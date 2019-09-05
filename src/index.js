@@ -1,32 +1,25 @@
-import Phaser from "phaser";
-import logoImg from "./assets/logo.png";
+import express from "express"
+import http from "http"
+import SocketIO from "socket.io-client"
 
-const config = {
-  type: Phaser.AUTO,
-  parent: "phaser-example",
-  width: 800,
-  height: 600,
-  scene: {
-    preload: preload,
-    create: create
-  }
-};
+let app = express();
+let server = http.Server(app);
+let io = new SocketIO(server);
+let port = process.env.PORT || 8080 // 3001
 
-const game = new Phaser.Game(config);
+app.use("*", express.static(__dirname + "/src"));
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/src/public/index.html");
+});
 
-function preload() {
-  this.load.image("logo", logoImg);
-}
+io.on("connection", (socket) => {
+  console.log("A new user connected!");
 
-function create() {
-  const logo = this.add.image(400, 150, "logo");
-
-  this.tweens.add({
-    targets: logo,
-    y: 450,
-    duration: 2000,
-    ease: "Power2",
-    yoyo: true,
-    loop: -1
+  socket.on("disconnect", () => {
+    console.log("User disconnected!");
   });
-}
+});
+
+server.listen(port, () => {
+  console.log("Listening on: " + port);
+});
