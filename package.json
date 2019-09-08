@@ -2,26 +2,22 @@
   "name": "redcarpet",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/dicon19/redcarpet.git"
+    "url": "git+https://github.com/dicon19/Redcarpet.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/dicon19/redcarpet/issues"
+    "url": "https://github.com/dicon19/Redcarpet/issues"
   },
-  "homepage": "https://github.com/dicon19/redcarpet#readme",
+  "homepage": "https://github.com/dicon19/Redcarpet#readme",
   "dependencies": {
-    "canvas": "^2.6.0",
-    "datauri": "^2.0.0",
     "express": "^4.17.1",
-    "jsdom": "^15.1.1",
-    "phaser": "^3.19.0",
     "socket.io": "^2.2.0"
   }
 }

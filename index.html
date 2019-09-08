@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <title>Redcarpet</title>
+    <link rel='shortcut icon' href='Assets/ball.png'>
+    <style>
+        @font-face {
+            font-family: 'NanumGothic';
+            src: url('Assets/NanumGothic.ttf') format('truetype');
+        }
+
+        canvas {
+            margin: 0 auto;
+        }
+
+        body {
+            margin: 0 auto;
+            background-color: black;
+        }
+    </style>
+</head>
+
+<body oncontextmenu='return false' ondragstart='return false' onselectstart='return false'>
+    <!-- 파일 불러오기 -->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/phaser-ce/2.13.2/phaser.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.slim.js'></script>
+    <script src='Scenes/boot.js'></script>
+    <script src='Scenes/menu.js'></script>
+    <script src='Scenes/ingame.js'></script>
+
+    <!-- 메인 -->
+    <script>
+        var game = new Phaser.Game(1920, 1080, Phaser.AUTO, '', null, false, false, null);
+        game.state.add('bootScene', boot);
+        game.state.add('menuScene', menu);
+        game.state.add('ingameScene', ingame);
+        game.state.start('bootScene');
+    </script>
+</body>
+
+</html>
