@@ -12,6 +12,7 @@ var boot = {
         game.stage.disableVisibilityChange = true;
 
         // 리소스 로드
+        game.load.image('ball', 'Assets/ball.png');
         game.load.image('button', 'Assets/button.png');
         game.load.image('wallpaper', 'Assets/wallpaper.png');
         game.add.text(0, 0, "Font loading...", {
@@ -27,5 +28,10 @@ var boot = {
     create: function() {
         game.stage.backgroundColor = "#4488AA";
         game.state.start('menuScene');
+
+        // 오디오 테스트
+        bgmAudio = game.add.audio("menu");
+        bgmAudio.volume = 1;
+        bgmAudio.loopFull(1);
     },
 }
