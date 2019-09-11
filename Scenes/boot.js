@@ -1,37 +1,53 @@
 /*
  * 부트 씬
  */
-var cursors;
-
 var boot = {
-    name: "boot",
-
     preload: function() {
         // 전체화면 설정
-        game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-        game.stage.disableVisibilityChange = true;
+        this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+        this.stage.disableVisibilityChange = true;
 
         // 리소스 로드
-        game.load.image('ball', 'Assets/ball.png');
-        game.load.image('button', 'Assets/button.png');
-        game.load.image('wallpaper', 'Assets/wallpaper.png');
-        game.add.text(0, 0, "Font loading...", {
+        this.load.image('ball', 'Assets/ball.png');
+        this.load.image('button', 'Assets/button.png');
+        this.load.image('wallpaper', 'Assets/wallpaper.png');
+        this.add.text(0, 0, "Font loading...", {
             fontSize: "1px"
         });
-        game.load.audio('menu', 'Assets/menu.mp3');
-        game.load.audio('ingame', 'Assets/ingame.mp3');
+        this.load.audio('menu', 'Assets/menu.mp3');
+        this.load.audio('ingame', 'Assets/ingame.mp3');
 
         // 입력장치 로드
-        cursors = game.input.keyboard.createCursorKeys();
+        cursors = this.input.keyboard.createCursorKeys();
     },
 
     create: function() {
-        game.stage.backgroundColor = "#4488AA";
-        game.state.start('menuScene');
+        this.stage.backgroundColor = "#4488AA";
+        this.state.start('menuScene');
 
         // 오디오 테스트
-        bgmAudio = game.add.audio("menu");
-        bgmAudio.volume = 1;
-        bgmAudio.loopFull(1);
+        //bgmAudio = this.add.audio("menu");
+        //bgmAudio.loopFull(1);
     },
 }
+
+/*
+ * 글로벌 변수
+ */
+var gameWidth = 1920;
+var gameHeight = 1080;
+var cursors;
+
+/*
+ * 게임 씬 로드
+ */
+var game = new Phaser.Game(gameWidth, gameHeight);
+game.state.add('bootScene', boot);
+game.state.add('menuScene', menu);
+game.state.add('ingameScene', ingame);
+game.state.start('bootScene');
+
+/*
+ * 소켓 설정
+ */
+var socket = io();

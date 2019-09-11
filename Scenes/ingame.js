@@ -3,28 +3,26 @@
  */
 var ingame = {
     create: function() {
-        this.socket = io();
+        this.world.setBounds(0, 0, gameWidth * 2 + gameWidth / 3 * 2, gameHeight);
         this.players = this.add.group();
-
-        this.socket.on('currentPlayers', (players) => {
+        
+        socket.on('currentPlayers', (players) => {
             Object.keys(players).forEach((id) => {
                 this.createPlayer(players[id]);
             });
         });
-
-        this.socket.on('newPlayer', (playerInfo) => {
+        
+        socket.on('newPlayer', (playerInfo) => {
             this.createPlayer(playerInfo);
         });
-
-        this.socket.on('disconnect', (playerId) => {
+        
+        socket.on('disconnect', (playerId) => {
             this.players.getChildren().forEach((player) => {
                 if (playerId === player.playerId) {
                     player.destroy();
                 }
             });
         });
-
-        this.world.setBounds(0, 0, 4480, 1080);
 
         this.wallpaper = this.add.sprite(0, 0, 'wallpaper');
 
@@ -36,9 +34,8 @@ var ingame = {
     update: function() {
         var hspd = cursors.right.isDown - cursors.left.isDown;
         var vspd = cursors.down.isDown - cursors.up.isDown;
-        game.camera.x += hspd * this.speed;
-        game.camera.y += vspd * this.speed;
-        //game.camera.shake(0.05, 500);
+        this.camera.x += hspd * this.speed;
+        this.camera.y += vspd * this.speed;
     },
 
     createPlayer: function() {
