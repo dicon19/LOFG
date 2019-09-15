@@ -3,8 +3,8 @@
  */
 var ingame = {
     create: function() {
-        this.world.setBounds(0, 0, gameWidth * 2 + gameWidth / 3 * 2, gameHeight);
-        this.players = this.add.group();
+        this.players = {}
+        this.speed = 10;
         
         socket.on('currentPlayers', (players) => {
             Object.keys(players).forEach((id) => {
@@ -24,11 +24,10 @@ var ingame = {
             });
         });
 
+        this.world.setBounds(0, 0, gameWidth * 2 + gameWidth / 3 * 2, gameHeight);
         this.wallpaper = this.add.sprite(0, 0, 'wallpaper');
-
         this.text = this.add.text(200, 500, '폰트 테스트');
         this.text.fixedToCamera = true;
-        this.speed = 10;
     },
 
     update: function() {

@@ -6,8 +6,8 @@ var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
 
-app.use('/Scenes', express.static(__dirname + '/Scenes'));
-app.use('/Assets', express.static(__dirname + '/Assets'));
+app.use('/js', express.static(__dirname + '/js'));
+app.use('/assets', express.static(__dirname + '/assets'));
 app.get('/', (req, res) => {
 	res.sendFile(__dirname + '/index.html');
 });

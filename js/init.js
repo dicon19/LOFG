@@ -1,28 +1,28 @@
 /*
  * 부트 씬
  */
-var boot = {
+var init = {
     preload: function() {
         // 전체화면 설정
-        this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-        this.stage.disableVisibilityChange = true;
+        game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+        game.stage.disableVisibilityChange = true;
 
         // 리소스 로드
-        this.load.image('ball', 'Assets/ball.png');
-        this.load.image('button', 'Assets/button.png');
-        this.load.image('wallpaper', 'Assets/wallpaper.png');
-        this.add.text(0, 0, "Font loading...", {
+        game.load.image('ball', 'Assets/ball.png');
+        game.load.image('button', 'Assets/button.png');
+        game.load.image('wallpaper', 'Assets/wallpaper.png');
+        game.add.text(0, 0, "Font loading...", {
             fontSize: "1px"
         });
-        this.load.audio('menu', 'Assets/menu.mp3');
-        this.load.audio('ingame', 'Assets/ingame.mp3');
+        game.load.audio('menu', 'Assets/menu.mp3');
+        game.load.audio('ingame', 'Assets/ingame.mp3');
+        game.plugins.add(PhaserInput.Plugin);
 
         // 입력장치 로드
         cursors = this.input.keyboard.createCursorKeys();
     },
 
     create: function() {
-        this.stage.backgroundColor = "#4488AA";
         this.state.start('menuScene');
 
         // 오디오 테스트
@@ -42,10 +42,10 @@ var cursors;
  * 게임 씬 로드
  */
 var game = new Phaser.Game(gameWidth, gameHeight);
-game.state.add('bootScene', boot);
+game.state.add('initScene', init);
 game.state.add('menuScene', menu);
 game.state.add('ingameScene', ingame);
-game.state.start('bootScene');
+game.state.start('initScene');
 
 /*
  * 소켓 설정
