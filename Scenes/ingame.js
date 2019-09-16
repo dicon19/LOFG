@@ -4,7 +4,7 @@
 var ingame = {
     create: function () {
         // 변수 초기화
-        this.players = {}
+        this.players = [];
 
         // 월드 초기화
         this.world.setBounds(0, 0, gameWidth * 2 + gameWidth / 3 * 2, gameHeight);
@@ -16,7 +16,7 @@ var ingame = {
 
         // 소켓 설정
         socket.on("currentPlayers", (players) => {
-            Object.keys(players).forEach((id) => {
+            this.players.forEach((id) => {
                 this.createPlayer(players[id]);
             });
         });
@@ -35,10 +35,7 @@ var ingame = {
     },
 
     update: function () {
-        var hspd = cursors.right.isDown - cursors.left.isDown;
-        var vspd = cursors.down.isDown - cursors.up.isDown;
-        this.camera.x += hspd * 10;
-        this.camera.y += vspd * 10;
+
     },
 
     createPlayer: function () {
