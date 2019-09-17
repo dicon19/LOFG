@@ -18,34 +18,37 @@ server.listen(port, () => {
 });
 
 var players = {};
-var rooms = {};
+var room1 = {};
+var room2 = {};
+var room3 = {};
 
 io.on("connection", (socket) => {
-    // 새로운 유저 연결됨
+    // 새로운 플레이어 연결됨
     players[socket.id] = {
         playerId: socket.id,
     };
     console.log("a user connected");
 
-    // 접속중인 유저 연결 끊김
+    // 접속중인 플레이어 연결 끊김
     socket.on("disconnect", () => {
         console.log("user disconnected");
         delete players[socket.id];
         io.emit("disconnect", socket.id);
     });
 
-    socket.on("onlineUser", () => {
-        socket.emit("onlineUser", Object.keys(players).length);
-        socket.broadcast.emit("onlineUser", Object.keys(players).length);
+    socket.on("enterLoby", () => {
+
+    });
+
+    socket.on("enterIngame", (channel) => {
+
     });
 });
 
 var tickRate = 1000 / 30;
 setInterval(() => {
     // 서버 업데이트
-    Object.keys(players).forEach((players) => {
-        // players[player.playerId].x = player.x;
-        // players[player.playerId].y = player.y;
+    Object.keys(players).forEach((player) => {
+
     });
-    io.emit("playerUpdates", players);
 }, tickRate);

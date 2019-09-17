@@ -8,7 +8,7 @@ var init = {
         game.stage.disableVisibilityChange = true;
 
         // 리소스 로드
-        game.load.image("ball", "Assets/ball.png");
+        game.load.image("logo", "Assets/logo.png");
         game.load.image("button", "Assets/button.png");
         game.load.image("wallpaper", "Assets/wallpaper.png");
         game.load.image("dummy_player", "Assets/dummy_player.png");
@@ -26,7 +26,7 @@ var init = {
     create: function () {
         game.state.start("menuScene");
     },
-}
+};
 
 /*
  * 글로벌 변수
@@ -34,6 +34,14 @@ var init = {
 var gameWidth = 1920;
 var gameHeight = 1080;
 var cursors;
+var playerInfo = {
+    nickname: "",
+    skin: "",
+    dress: "",
+    hair: "",
+    acc: "",
+    tatto: "",
+};
 
 /*
  * 게임 씬 로드

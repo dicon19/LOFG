@@ -7,12 +7,8 @@ var ingame = {
         this.players = [];
 
         // 월드 초기화
-        this.world.setBounds(0, 0, gameWidth * 2 + gameWidth / 3 * 2, gameHeight);
-        this.wallpaper = game.add.sprite(0, 0, "wallpaper");
-
-        // UI
-        this.text = game.add.text(200, 500, "폰트 테스트");
-        this.text.fixedToCamera = true;
+        game.world.setBounds(0, 0, gameWidth, gameHeight);
+        game.wallpaper = game.add.sprite(0, 0, "wallpaper");
 
         // 소켓 설정
         socket.on("currentPlayers", (players) => {
@@ -26,7 +22,7 @@ var ingame = {
         });
 
         socket.on("disconnect", (playerId) => {
-            Object.keys(this.players).forEach((player) => {
+            players.forEach((player) => {
                 if (playerId === player.playerId) {
                     player.destroy();
                 }
@@ -39,6 +35,7 @@ var ingame = {
     },
 
     createPlayer: function () {
-        var player = game.add.sprite(Math.random() * 500, Math.random() * 500, "ball");
+        var player = game.add.sprite(0, 0, "dummy_player");
+        this.players.push(player);
     },
-}
+};
