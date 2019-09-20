@@ -43,7 +43,7 @@ var menu = {
             borderRadius: 100,
             placeHolder: "이름",
             textAlign: "center",
-            type: PhaserInput.InputType.text
+            type: PhaserInput.InputType.text,
         });
         this.player = game.add.sprite(gameWidth / 2, 2600, "dummy_player");
         this.player.anchor.set(0.5);
