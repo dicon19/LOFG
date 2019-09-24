@@ -1,24 +1,27 @@
 {
-  "name": "redcarpet",
+  "name": "wpnchall",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dicon19/Redcarpet.git"
+    "url": "git+https://github.com/dicon19/wpnchall.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/dicon19/Redcarpet/issues"
+    "url": "https://github.com/dicon19/wpnchall/issues"
   },
-  "homepage": "https://github.com/dicon19/Redcarpet#readme",
+  "homepage": "https://github.com/dicon19/wpnchall#readme",
   "dependencies": {
+    "canvas": "^2.6.0",
+    "datauri": "^2.0.0",
     "express": "^4.17.1",
-    "socket.io": "^2.2.0"
-  },
-  "devDependencies": {}
+    "jsdom": "^15.1.1",
+    "phaser": "^3.19.0",
+    "socket.io": "^2.3.0"
+  }
 }
