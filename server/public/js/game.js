@@ -13,8 +13,8 @@ var config = {
 var game = new Phaser.Game(config);
 
 function preload() {
-    this.load.image('player', 'assets/favicon.png');
-
+	// 리소스 불러오기
+    this.load.image('player', 'assets/sprites/player.png');
     this.load.tilemapTiledJSON('map', 'assets/tilemaps/map.json');
     this.load.image('tiles', 'assets/tilesets/tileset.png');
 }
@@ -23,6 +23,7 @@ function create() {
     this.socket = io();
     this.players = this.add.group();
 
+	// 접속된 플레이어 정보 받아오기
     this.socket.on('currentPlayers', (players) => {
         Object.keys(players).forEach((id) => {
             if (players[id].playerId === this.socket.id) {
@@ -33,10 +34,12 @@ function create() {
         });
     });
 
+	// 새로운 플레이어 접속
     this.socket.on('newPlayer', (playerInfo) => {
         createPlayer(this, playerInfo, 'player');
     });
 
+	// 접속된 플레이어 연결 끊김
     this.socket.on('disconnect', (playerId) => {
         this.players.getChildren().forEach((player) => {
             if (playerId === player.playerId) {
@@ -45,6 +48,7 @@ function create() {
         });
     });
 
+	// 게임 업데이트
     this.socket.on('playerUpdates', (players) => {
         Object.keys(players).forEach((id) => {
             this.players.getChildren().forEach((player) => {
@@ -65,9 +69,10 @@ function create() {
 
 
 function update() {
-    const left = this.cursors.left.isDown;
-    const right = this.cursors.right.isDown;
-    const up = this.cursors.up.isDown;
+	// 플레이어 이동
+    var left = this.cursors.left.isDown;
+    var right = this.cursors.right.isDown;
+    var up = this.cursors.up.isDown;
 
     if (left || right || up) {
         this.socket.emit('playerInput', {

@@ -28,8 +28,8 @@ function WebGLTexture() {};
 var game = new Phaser.Game(config);
 
 function preload() {
-    this.load.image('player', 'assets/player.png');
-
+	// 리소스 불러오기
+    this.load.image('player', 'assets/sprites/player.png');
     this.load.tilemapTiledJSON('map', 'assets/tilemaps/map.json');
     this.load.image('tiles', 'assets/tilesets/tileset.png');
 }
@@ -40,7 +40,17 @@ function create() {
     io.on('connection', (socket) => {
         console.log('a user connected');
 
-        // 플레이어 연결 끊김
+		// 새로운 플레이어 연길
+        players[socket.id] = {
+            x: Math.floor(Math.random() * 1280),
+            y: 0,
+            playerId: socket.id
+        };
+        addPlayer(this, players[socket.id]);
+        socket.emit('currentPlayers', players);
+        socket.broadcast.emit('newPlayer', players[socket.id]);
+		
+        // 플레이어 연결 끊김	
         socket.on('disconnect', () => {
             console.log('user disconnected');
             removePlayer(this, socket.id);
@@ -64,16 +74,6 @@ function create() {
                 }
             });
         });
-
-        // 새로운 플레이어 연길
-        players[socket.id] = {
-            x: Math.floor(Math.random() * 1280),
-            y: 0,
-            playerId: socket.id
-        };
-        addPlayer(this, players[socket.id]);
-        socket.emit('currentPlayers', players);
-        socket.broadcast.emit('newPlayer', players[socket.id]);
     });
 
     // 맵 불러오기
