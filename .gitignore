@@ -91,7 +91,4 @@ typings/
 # DynamoDB Local files
 .dynamodb/
 
-# goorm.io
-goorm.manifest
-
 # End of https://www.gitignore.io/api/node
