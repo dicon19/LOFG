@@ -1,6 +1,6 @@
-let players = {};
+var players = {};
 
-const config = {
+var config = {
     autoFocus: false,
     type: Phaser.HEADLESS,
     parent: "phaser-example",
@@ -24,7 +24,7 @@ const config = {
 // Phaser 3.19.0 헤드리스 오류 수정
 function WebGLTexture() {}
 
-const game = new Phaser.Game(config);
+var game = new Phaser.Game(config);
 
 function preload() {
     // 스프라이트 불러오기
@@ -77,12 +77,17 @@ function create() {
                 }
             });
         });
+
+        // 핑 보내기
+        socket.on("latency", () => {
+            socket.emit("latency");
+        });
     });
 
     // 맵 불러오기
-    let map = this.make.tilemap({ key: "map" });
-    let tileset = map.addTilesetImage("tileset", "tiles");
-    let worldLayer = map.createStaticLayer("world", tileset, 0, 0);
+    var map = this.make.tilemap({ key: "map" });
+    var tileset = map.addTilesetImage("tileset", "tiles");
+    var worldLayer = map.createStaticLayer("world", tileset, 0, 0);
     worldLayer.setCollisionByProperty({ solid: true });
     this.physics.world.bounds.width = worldLayer.width;
     this.physics.world.bounds.height = worldLayer.height;
@@ -99,13 +104,13 @@ function update() {
 }
 
 function addPlayer(self, playerInfo) {
-    let player = self.physics.add
+    var player = self.physics.add
         .sprite(playerInfo.x, playerInfo.y, playerInfo.sprite)
-        .setOrigin(0.5, 0.5)
-        .setBounce(0.2)
-        .setCollideWorldBounds(true);
-    player.playerId = playerInfo.playerId;
+        .setOrigin(0.5, 0.5);
     self.players.add(player);
+    player.setBounce(1, 1);
+    player.setCollideWorldBounds(true);
+    player.playerId = playerInfo.playerId;
 }
 
 function removePlayer(self, playerId) {

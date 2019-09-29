@@ -1,4 +1,4 @@
-const config = {
+var config = {
     type: Phaser.AUTO,
     parent: "phaser-example",
     width: 1280,
@@ -10,7 +10,7 @@ const config = {
     }
 };
 
-const game = new Phaser.Game(config);
+var game = new Phaser.Game(config);
 
 function preload() {
     // 스프라이트 불러오기
@@ -22,17 +22,26 @@ function preload() {
     // 타일맵 불러오기
     this.load.tilemapTiledJSON("map", "assets/tilemaps/map.json");
 }
+console.log(this);
 
 function create() {
-    this.socket = io();
-    this.players = this.add.group();
-    let player;
     this.cursors = this.input.keyboard.createCursorKeys();
+    this.players = this.add.group();
+    this.socket = io();
+
+    var myPlayer;
+
+    // 핑 보내기
+    var startTime, latency;
+    setInterval(() => {
+        startTime = Date.now();
+        this.socket.emit("latency");
+    }, 1000);
 
     // (나를 포함한)서버에 있는 모든 플레이어 정보 받아오기
     this.socket.on("currentPlayers", (players) => {
         Object.keys(players).forEach((id) => {
-            let playerInfo = players[id];
+            var playerInfo = players[id];
 
             if (playerInfo.playerId === this.socket.id) {
                 // 카메라 플레이어 고정
@@ -66,17 +75,23 @@ function create() {
         });
     });
 
+    // 핑 확인
+    this.socket.on("latency", () => {
+        latency = Date.now() - startTime;
+        console.log(latency);
+    });
+
     // 맵 불러오기
-    let map = this.make.tilemap({ key: "map" });
-    let tileset = map.addTilesetImage("tileset", "tiles");
-    let worldLayer = map.createStaticLayer("world", tileset, 0, 0);
+    var map = this.make.tilemap({ key: "map" });
+    var tileset = map.addTilesetImage("tileset", "tiles");
+    var worldLayer = map.createStaticLayer("world", tileset, 0, 0);
 }
 
 function update() {
     // 플레이어 이동
-    let left = this.cursors.left.isDown;
-    let right = this.cursors.right.isDown;
-    let up = this.cursors.up.isDown;
+    var left = this.cursors.left.isDown;
+    var right = this.cursors.right.isDown;
+    var up = this.cursors.up.isDown;
 
     if (left || right || up) {
         this.socket.emit("playerInput", {
@@ -88,7 +103,7 @@ function update() {
 }
 
 function addPlayer(self, playerInfo) {
-    let player = self.add
+    var player = self.add
         .sprite(playerInfo.x, playerInfo.y, playerInfo.sprite)
         .setOrigin(0.5, 0.5);
     player.playerId = playerInfo.playerId;
