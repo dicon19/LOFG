@@ -3,6 +3,10 @@ var config = {
     parent: "phaser-example",
     width: 1280,
     height: 720,
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+    },
     scene: {
         preload: preload,
         create: create,
@@ -22,7 +26,6 @@ function preload() {
     // 타일맵 불러오기
     this.load.tilemapTiledJSON("map", "assets/tilemaps/map.json");
 }
-console.log(this);
 
 function create() {
     this.cursors = this.input.keyboard.createCursorKeys();
@@ -30,6 +33,22 @@ function create() {
     this.socket = io();
 
     var myPlayer;
+
+    // UI
+    this.timerText = this.add.text(120, 60, "앙Gㅗ띠II!@#", {
+        fontFamily: '"NanumGothic"',
+        fontSize: "64px"
+    });
+
+    // 타이머
+    this.timer = this.time.addEvent({
+        delay: 1000,
+        callback: () => {
+            console.log("ALERT");
+        },
+        callbackScope: this,
+        loop: true
+    });
 
     // 핑 보내기
     var startTime, latency;
@@ -78,7 +97,6 @@ function create() {
     // 핑 확인
     this.socket.on("latency", () => {
         latency = Date.now() - startTime;
-        console.log(latency);
     });
 
     // 맵 불러오기
@@ -88,16 +106,18 @@ function create() {
 }
 
 function update() {
-    // 플레이어 이동
+    // 플레이어 이동 | 공격
     var left = this.cursors.left.isDown;
     var right = this.cursors.right.isDown;
     var up = this.cursors.up.isDown;
+    var attack = this.cursors.space.isDown;
 
-    if (left || right || up) {
+    if (left || right || up || attack) {
         this.socket.emit("playerInput", {
             left: left,
             right: right,
-            up: up
+            up: up,
+            attack: attack
         });
     }
 }

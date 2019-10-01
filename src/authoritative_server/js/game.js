@@ -6,18 +6,18 @@ var config = {
     parent: "phaser-example",
     width: 1280,
     height: 720,
-    physics: {
-        default: "arcade",
-        arcade: {
-            gravity: {
-                y: 300
-            }
-        }
-    },
     scene: {
         preload: preload,
         create: create,
         update: update
+    },
+    physics: {
+        default: "arcade",
+        arcade: {
+            gravity: {
+                y: 500
+            }
+        }
     }
 };
 
@@ -65,14 +65,14 @@ function create() {
         socket.on("playerInput", (inputData) => {
             this.players.getChildren().forEach((player) => {
                 if (socket.id === player.playerId) {
-                    if (inputData.left) {
-                        player.body.setVelocityX(-200);
-                    }
-                    if (inputData.right) {
-                        player.body.setVelocityX(200);
-                    }
+                    var hspeed = (inputData.right - inputData.left) * 200;
+                    player.body.setVelocityX(hspeed);
+
                     if (inputData.up && player.body.onFloor()) {
                         player.body.setVelocityY(-500);
+                    }
+
+                    if (inputData.attack) {
                     }
                 }
             });
@@ -108,8 +108,10 @@ function addPlayer(self, playerInfo) {
         .sprite(playerInfo.x, playerInfo.y, playerInfo.sprite)
         .setOrigin(0.5, 0.5);
     self.players.add(player);
-    player.setBounce(1, 1);
-    player.setCollideWorldBounds(true);
+    player.body.setBounce(0, 0.15);
+    player.body.setCollideWorldBounds(true);
+    player.body.setDragX(0.95);
+    player.body.useDamping = true;
     player.playerId = playerInfo.playerId;
 }
 
