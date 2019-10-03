@@ -17,41 +17,126 @@ var config = {
 var game = new Phaser.Game(config);
 
 function preload() {
-    // 스프라이트 불러오기
-    this.load.image("player", "assets/sprites/player.png");
+    // 리소스 불러오기
+    this.load.spritesheet(
+        "player1_walk",
+        "assets/animations/player1_walk.png",
+        {
+            frameWidth: 32,
+            frameHeight: 32
+        }
+    );
+    this.load.spritesheet(
+        "player2_walk",
+        "assets/animations/player2_walk.png",
+        {
+            frameWidth: 32,
+            frameHeight: 32
+        }
+    );
+    this.load.spritesheet(
+        "player3_walk",
+        "assets/animations/player3_walk.png",
+        {
+            frameWidth: 32,
+            frameHeight: 32
+        }
+    );
 
-    // 타일셋 불러오기
+    this.load.image("player1", "assets/sprites/player1.png");
+    this.load.image("player2", "assets/sprites/player2.png");
+    this.load.image("player3", "assets/sprites/player3.png");
     this.load.image("tiles", "assets/tilesets/four-seasons-tileset.png");
 
-    // 타일맵 불러오기
     this.load.tilemapTiledJSON("map", "assets/tilemaps/map.json");
 }
 
 function create() {
+    this.socket = io();
     this.cursors = this.input.keyboard.createCursorKeys();
     this.players = this.add.group();
-    this.socket = io();
+    this.bullets = this.add.group();
 
-    var myPlayer;
+    // 애니메이션 추가
+    this.anims.create({
+        key: "player1_idle",
+        frames: [{ key: "player1" }],
+        frameRate: 12,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "player2_idle",
+        frames: [{ key: "player2" }],
+        frameRate: 12,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "player3_idle",
+        frames: [{ key: "player3" }],
+        frameRate: 12,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "player1_walk",
+        frames: this.anims.generateFrameNames("player1_walk"),
+        frameRate: 12,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "player2_walk",
+        frames: this.anims.generateFrameNames("player2_walk"),
+        frameRate: 12,
+        repeat: -1
+    });
+    this.anims.create({
+        key: "player3_walk",
+        frames: this.anims.generateFrameNames("player3_walk"),
+        frameRate: 12,
+        repeat: -1
+    });
 
     // UI
-    this.timerText = this.add.text(120, 60, "앙Gㅗ띠II!@#", {
+    this.timerText = this.add.text(120, 60, "", {
         fontFamily: '"NanumGothic"',
         fontSize: "64px"
     });
 
+    this.pingText = this.add.text(340, 60, "", {
+        fontFamily: '"NanumGothic"',
+        fontSize: "32px"
+    });
+
     // 타이머
-    this.timer = this.time.addEvent({
+    this.timer = "10:00";
+    this.timerAlarm = this.time.addEvent({
         delay: 1000,
         callback: () => {
-            console.log("ALERT");
+            var min = Number(this.timer.substr(0, 2));
+            var sec = Number(this.timer.substr(3, 2));
+
+            if (sec > 0) {
+                sec--;
+            } else {
+                min--;
+                sec = 59;
+            }
+
+            if (sec < 10) {
+                sec = "0" + sec;
+            }
+
+            if (min < 10) {
+                min = "0" + min;
+            }
+            this.timer = min + ":" + sec;
+            this.timerText.setText(this.timer);
         },
         callbackScope: this,
         loop: true
     });
 
     // 핑 보내기
-    var startTime, latency;
+    var startTime;
     setInterval(() => {
         startTime = Date.now();
         this.socket.emit("latency");
@@ -62,8 +147,9 @@ function create() {
         Object.keys(players).forEach((id) => {
             var playerInfo = players[id];
 
-            if (playerInfo.playerId === this.socket.id) {
+            if (playerInfo.playerId == this.socket.id) {
                 // 카메라 플레이어 고정
+                this.myPlayer;
             }
             addPlayer(this, playerInfo);
         });
@@ -77,7 +163,7 @@ function create() {
     // 플레이어 접속 끊김
     this.socket.on("disconnect", (playerId) => {
         this.players.getChildren().forEach((player) => {
-            if (playerId === player.playerId) {
+            if (playerId == player.playerId) {
                 player.destroy();
             }
         });
@@ -87,22 +173,33 @@ function create() {
     this.socket.on("playerUpdates", (players) => {
         Object.keys(players).forEach((id) => {
             this.players.getChildren().forEach((player) => {
-                if (players[id].playerId === player.playerId) {
+                // 플레이어 위치 설정
+                if (players[id].playerId == player.playerId) {
                     player.setPosition(players[id].x, players[id].y);
                 }
+
+                // 플레이어 애니메이션 설정
+                if (players[id].isMove) {
+                    player.anims.play("player1_walk", true);
+                } else {
+                    player.anims.play("player1_idle", true);
+                }
+                player.flipX = players[id].flipX;
             });
         });
     });
 
     // 핑 확인
     this.socket.on("latency", () => {
-        latency = Date.now() - startTime;
+        var latency = Date.now() - startTime;
+        this.pingText.setText(latency);
     });
 
     // 맵 불러오기
     var map = this.make.tilemap({ key: "map" });
     var tileset = map.addTilesetImage("tileset", "tiles");
     var worldLayer = map.createStaticLayer("world", tileset, 0, 0);
+    worldLayer.setDepth(-100);
 }
 
 function update() {
@@ -126,6 +223,6 @@ function addPlayer(self, playerInfo) {
     var player = self.add
         .sprite(playerInfo.x, playerInfo.y, playerInfo.sprite)
         .setOrigin(0.5, 0.5);
-    player.playerId = playerInfo.playerId;
     self.players.add(player);
+    player.playerId = playerInfo.playerId;
 }
