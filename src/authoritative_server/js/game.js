@@ -47,7 +47,7 @@ function create() {
             playerId: socket.id,
             x: Math.floor(Math.random() * 1280),
             y: 0,
-            sprite: "player1",
+            sprite: choose(["player1", "player2", "player3"]),
             isMove: false,
             flipX: false
         };
@@ -104,10 +104,11 @@ function create() {
 function update() {
     // 플레이어 업데이트
     this.players.getChildren().forEach((player) => {
-        players[player.playerId].x = player.x;
-        players[player.playerId].y = player.y;
-        players[player.playerId].isMove = Math.abs(player.body.velocity.x) > 20;
-        players[player.playerId].flipX = player.flipX;
+        playerInfo = players[player.playerId];
+        playerInfo.x = player.x;
+        playerInfo.y = player.y;
+        playerInfo.isMove = Math.abs(player.body.velocity.x) > 20;
+        playerInfo.flipX = player.flipX;
     });
     io.emit("playerUpdates", players);
 }
@@ -130,6 +131,10 @@ function removePlayer(self, playerId) {
             player.destroy();
         }
     });
+}
+
+function choose(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
 }
 
 window.gameLoaded();

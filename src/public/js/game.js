@@ -173,18 +173,20 @@ function create() {
     this.socket.on("playerUpdates", (players) => {
         Object.keys(players).forEach((id) => {
             this.players.getChildren().forEach((player) => {
-                // 플레이어 위치 설정
-                if (players[id].playerId == player.playerId) {
-                    player.setPosition(players[id].x, players[id].y);
-                }
+                var playerInfo = players[id];
 
-                // 플레이어 애니메이션 설정
-                if (players[id].isMove) {
-                    player.anims.play("player1_walk", true);
-                } else {
-                    player.anims.play("player1_idle", true);
+                if (playerInfo.playerId == player.playerId) {
+                    // 플레이어 위치 설정
+                    player.setPosition(playerInfo.x, playerInfo.y);
+
+                    // 플레이어 애니메이션 설정
+                    if (playerInfo.isMove) {
+                        player.anims.play(playerInfo.sprite + "_walk", true);
+                    } else {
+                        player.anims.play(playerInfo.sprite + "_idle", true);
+                    }
+                    player.flipX = playerInfo.flipX;
                 }
-                player.flipX = players[id].flipX;
             });
         });
     });
