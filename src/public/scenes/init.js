@@ -7,6 +7,7 @@ class InitScene extends Phaser.Scene {
         // 리소스 불러오기
         this.load.image("logo", "assets/sprites/logo.png");
         this.load.image("customize", "assets/sprites/customize.png");
+        this.load.image("facebook", "assets/sprites/facebook.png");
         this.load.image("arrow", "assets/sprites/arrow.png");
         this.load.image("button", "assets/sprites/button.png");
         this.load.image("player1", "assets/sprites/player1.png");
@@ -14,7 +15,7 @@ class InitScene extends Phaser.Scene {
         this.load.image("player3", "assets/sprites/player3.png");
         this.load.image("tiles", "assets/tilesets/four-seasons-tileset.png");
 
-        this.load.html("nameform", "assets/text/nameform.html");
+        this.load.html("nameform", "assets/form/nameform.html");
 
         this.load.tilemapTiledJSON("map", "assets/tilemaps/map.json");
 

@@ -10,7 +10,7 @@ var config = {
     dom: {
         createContainer: true
     },
-    scene: [InitScene, MenuScene, IngameScene]
+    scene: [InitScene, MenuScene, CustomizeScene, IngameScene]
 };
 
 var game = new Phaser.Game(config);

@@ -1,12 +1,12 @@
-const path = require("path");
-const jsdom = require("jsdom");
-const express = require("express");
-const app = express();
-const server = require("http").Server(app);
-const io = require("socket.io").listen(server);
-const Datauri = require("datauri");
-const datauri = new Datauri();
-const { JSDOM } = jsdom;
+var path = require("path");
+var jsdom = require("jsdom");
+var express = require("express");
+var app = express();
+var server = require("http").Server(app);
+var io = require("socket.io").listen(server);
+var Datauri = require("datauri");
+var datauri = new Datauri();
+var { JSDOM } = jsdom;
 
 app.use(express.static(__dirname + "/public"));
 app.get("/", (req, res) => {
@@ -31,7 +31,7 @@ function setupAuthoritativePhaser() {
             dom.window.URL.revokeObjectURL = (objectURL) => {};
 
             dom.window.gameLoaded = () => {
-                let port = process.env.PORT;
+                var port = process.env.PORT;
                 if (port == null || port == "") {
                     port = 8082;
                 }
