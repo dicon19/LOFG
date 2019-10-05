@@ -21,10 +21,10 @@ var config = {
     }
 };
 
+var game = new Phaser.Game(config);
+
 // Phaser 3.19.0 헤드리스 오류 수정
 function WebGLTexture() {}
-
-var game = new Phaser.Game(config);
 
 function preload() {
     // 리소스 불러오기
@@ -39,6 +39,34 @@ function preload() {
 function create() {
     this.players = this.physics.add.group();
     this.bullets = this.physics.add.group();
+
+    // 타이머
+    this.timer = "10:00";
+    this.timerAlarm = this.time.addEvent({
+        delay: 1000,
+        callback: () => {
+            var min = Number(this.timer.substr(0, 2));
+            var sec = Number(this.timer.substr(3, 2));
+
+            if (sec > 0) {
+                sec--;
+            } else {
+                min--;
+                sec = 59;
+            }
+
+            if (sec < 10) {
+                sec = "0" + sec;
+            }
+
+            if (min < 10) {
+                min = "0" + min;
+            }
+            this.timer = min + ":" + sec;
+        },
+        callbackScope: this,
+        loop: true
+    });
 
     io.on("connection", (socket) => {
         // 새로운 플레이어 접속
