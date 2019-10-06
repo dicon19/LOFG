@@ -8,14 +8,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/dicon19/wpnchall.git"
+        "url": "git+https://github.com/dicon19/wpnchall-server.git"
     },
     "author": "",
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/dicon19/wpnchall/issues"
+        "url": "https://github.com/dicon19/wpnchall-server/issues"
     },
-    "homepage": "https://github.com/dicon19/wpnchall#readme",
+    "homepage": "https://github.com/dicon19/wpnchall-server#readme",
     "dependencies": {
         "canvas": "^2.6.0",
         "datauri": "^2.0.0",

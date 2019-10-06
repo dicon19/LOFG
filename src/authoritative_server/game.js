@@ -1,6 +1,6 @@
-var players = {};
+const players = {};
 
-var config = {
+const config = {
     autoFocus: false,
     type: Phaser.HEADLESS,
     parent: "phaser-example",
@@ -21,7 +21,7 @@ var config = {
     }
 };
 
-var game = new Phaser.Game(config);
+const game = new Phaser.Game(config);
 
 // Phaser 3.19.0 헤드리스 오류 수정
 function WebGLTexture() {}
@@ -45,8 +45,8 @@ function create() {
     this.timerAlarm = this.time.addEvent({
         delay: 1000,
         callback: () => {
-            var min = Number(this.timer.substr(0, 2));
-            var sec = Number(this.timer.substr(3, 2));
+            let min = Number(this.timer.substr(0, 2));
+            let sec = Number(this.timer.substr(3, 2));
 
             if (sec > 0) {
                 sec--;
@@ -64,7 +64,6 @@ function create() {
             }
             this.timer = min + ":" + sec;
         },
-        callbackScope: this,
         loop: true
     });
 
@@ -120,19 +119,17 @@ function create() {
     });
 
     // 맵 불러오기
-    var map = this.make.tilemap({ key: "map" });
-    var tileset = map.addTilesetImage("tileset", "tiles");
-    var worldLayer = map.createStaticLayer("world", tileset, 0, 0);
-    worldLayer.setCollisionByProperty({ solid: true });
-    this.physics.world.bounds.width = worldLayer.width;
-    this.physics.world.bounds.height = worldLayer.height;
-    this.physics.add.collider(this.players, worldLayer);
+    this.map = this.make.tilemap({ key: "map" });
+    this.tileset = this.map.addTilesetImage("tileset", "tiles");
+    this.worldLayer = this.map.createStaticLayer("world", this.tileset, 0, 0);
+    this.worldLayer.setCollisionByProperty({ solid: true });
+    this.physics.add.collider(this.players, this.worldLayer);
 }
 
 function update() {
     // 플레이어 업데이트
     this.players.getChildren().forEach((player) => {
-        playerInfo = players[player.playerId];
+        const playerInfo = players[player.playerId];
         playerInfo.x = player.x;
         playerInfo.y = player.y;
         playerInfo.isMove = Math.abs(player.body.velocity.x) > 20;
@@ -142,7 +139,7 @@ function update() {
 }
 
 function addPlayer(self, playerInfo) {
-    var player = self.physics.add
+    const player = self.physics.add
         .sprite(playerInfo.x, playerInfo.y, playerInfo.sprite)
         .setOrigin(0.5, 0.5);
     self.players.add(player);
