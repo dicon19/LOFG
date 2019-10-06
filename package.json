@@ -2,20 +2,20 @@
     "name": "wpnchall",
     "version": "1.0.0",
     "description": "",
-    "main": "index.js",
+    "main": "src/index.js",
     "scripts": {
         "start": "node src/index.js"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/dicon19/wpnchall-server.git"
+        "url": "git+https://github.com/dicon19/wpnchall.git"
     },
     "author": "",
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/dicon19/wpnchall-server/issues"
+        "url": "https://github.com/dicon19/wpnchall/issues"
     },
-    "homepage": "https://github.com/dicon19/wpnchall-server#readme",
+    "homepage": "https://github.com/dicon19/wpnchall#readme",
     "dependencies": {
         "canvas": "^2.6.0",
         "datauri": "^2.0.0",

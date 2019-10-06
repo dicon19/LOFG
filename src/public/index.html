@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>WeaponChallenge</title>
+        <link rel="shortcut icon" href="assets/favicon.png" />
+        <style>
+            @font-face {
+                font-family: "NanumGothic";
+                src: url("assets/fonts/NanumGothic.ttf");
+            }
+
+            canvas {
+                margin: 0 auto;
+            }
+
+            body {
+                margin: 0 auto;
+                background-color: black;
+                overflow: hidden;
+            }
+        </style>
+    </head>
+
+    <body oncontextmenu="return false" ondragstart="return false" onselectstart="return false">
+        <!-- 파일 불러오기 -->
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.19.0/phaser.min.js"></script>
+        <script src="scenes/init.js"></script>
+        <script src="scenes/menu.js"></script>
+        <script src="scenes/customize.js"></script>
+        <script src="scenes/ingame.js"></script>
+        <script src="game.js"></script>
+    </body>
+</html>
