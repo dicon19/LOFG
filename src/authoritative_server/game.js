@@ -1,4 +1,4 @@
-const players = {};
+const instances = {};
 
 const config = {
     autoFocus: false,
@@ -20,7 +20,6 @@ const config = {
         }
     }
 };
-
 const game = new Phaser.Game(config);
 
 // Phaser 3.19.0 헤드리스 오류 수정
@@ -31,6 +30,7 @@ function preload() {
     this.load.image("player1", "assets/sprites/player1.png");
     this.load.image("player2", "assets/sprites/player2.png");
     this.load.image("player3", "assets/sprites/player3.png");
+    this.load.image("bullet", "assets/sprites/bullet.png");
     this.load.image("tiles", "assets/tilesets/four-seasons-tileset.png");
 
     this.load.tilemapTiledJSON("map", "assets/tilemaps/map.json");
@@ -40,7 +40,7 @@ function create() {
     this.players = this.physics.add.group();
     this.bullets = this.physics.add.group();
 
-    // 타이머
+    // 게임 제한시간 타이머
     this.timer = "10:00";
     this.timerAlarm = this.time.addEvent({
         delay: 1000,
@@ -70,30 +70,36 @@ function create() {
     io.on("connection", (socket) => {
         // 새로운 플레이어 접속
         console.log("a user connected");
-        players[socket.id] = {
-            playerId: socket.id,
+        instances[socket.id] = {
+            instanceId: socket.id,
+            instanceType: "player",
             x: Math.floor(Math.random() * 1280),
             y: 0,
             sprite: choose(["player1", "player2", "player3"]),
             isMove: false,
             flipX: false
         };
-        addPlayer(this, players[socket.id]);
-        socket.emit("currentPlayers", players);
-        socket.broadcast.emit("newPlayer", players[socket.id]);
+        createPlayer(this, instances[socket.id]);
+        socket.emit("currentInstances", instances);
+        socket.broadcast.emit("addPlayer", instances[socket.id]);
 
         // 플레이어 접속 끊김
         socket.on("disconnect", () => {
             console.log("user disconnected");
-            removePlayer(this, socket.id);
-            delete players[socket.id];
+            this.players.getChildren().forEach((player) => {
+                if (socket.id == player.instanceId) {
+                    player.destroy();
+                }
+            });
+            delete instances[socket.id];
             io.emit("disconnect", socket.id);
         });
 
-        // 플레이어 움직임
+        // 플레이어 입력
         socket.on("playerInput", (inputData) => {
             this.players.getChildren().forEach((player) => {
-                if (socket.id == player.playerId) {
+                if (socket.id == player.instanceId) {
+                    // 이동
                     if (inputData.left) {
                         player.body.setVelocityX(-200);
                         player.flipX = true;
@@ -102,11 +108,24 @@ function create() {
                         player.flipX = false;
                     }
 
+                    // 점프
                     if (inputData.up && player.body.onFloor()) {
                         player.body.setVelocityY(-500);
                     }
 
+                    // 공격
                     if (inputData.attack) {
+                        const id = uuidgen();
+                        instances[id] = {
+                            instanceId: id,
+                            instanceType: "bullet",
+                            x: player.x,
+                            y: player.y,
+                            sprite: "bullet",
+                            flipX: player.flipX
+                        };
+                        createBullet(this, instances[id]);
+                        io.emit("addBullet", instances[id]);
                     }
                 }
             });
@@ -129,16 +148,25 @@ function create() {
 function update() {
     // 플레이어 업데이트
     this.players.getChildren().forEach((player) => {
-        const playerInfo = players[player.playerId];
+        const playerInfo = instances[player.instanceId];
         playerInfo.x = player.x;
         playerInfo.y = player.y;
         playerInfo.isMove = Math.abs(player.body.velocity.x) > 20;
         playerInfo.flipX = player.flipX;
     });
-    io.emit("playerUpdates", players);
+
+    // 총알 업데이트
+    this.bullets.getChildren().forEach((bullet) => {
+        const bulletInfo = instances[bullet.instanceId];
+        bulletInfo.x = bullet.x;
+        bulletInfo.y = bullet.y;
+    });
+
+    // 모든 인스턴스 정보 보내기
+    io.emit("instanceUpdates", instances);
 }
 
-function addPlayer(self, playerInfo) {
+function createPlayer(self, playerInfo) {
     const player = self.physics.add
         .sprite(playerInfo.x, playerInfo.y, playerInfo.sprite)
         .setOrigin(0.5, 0.5);
@@ -147,19 +175,27 @@ function addPlayer(self, playerInfo) {
     player.body.setCollideWorldBounds(true);
     player.body.setDragX(0.95);
     player.body.useDamping = true;
-    player.playerId = playerInfo.playerId;
+    player.instanceId = playerInfo.instanceId;
 }
 
-function removePlayer(self, playerId) {
-    self.players.getChildren().forEach((player) => {
-        if (playerId == player.playerId) {
-            player.destroy();
-        }
-    });
+function createBullet(self, bulletInfo) {
+    const bullet = self.physics.add
+        .sprite(bulletInfo.x, bulletInfo.y, bulletInfo.sprite)
+        .setOrigin(0.5, 0.5);
+    self.bullets.add(bullet);
+    bullet.body.velocity.x = !bulletInfo.flipX ? 100 : -100;
+    bullet.instanceId = bulletInfo.instanceId;
 }
 
 function choose(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function uuidgen() {
+    function s4() {
+        return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
+    }
+    return s4() + s4() + "-" + s4() + "-" + s4() + "-" + s4() + "-" + s4() + s4() + s4();
 }
 
 window.gameLoaded();

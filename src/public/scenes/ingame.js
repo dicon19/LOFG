@@ -27,54 +27,74 @@ class IngameScene extends Phaser.Scene {
             this.socket.emit("latency");
         }, 1000);
 
-        // (나를 포함한)서버에 있는 모든 플레이어 정보 받아오기
-        this.socket.on("currentPlayers", (players) => {
-            Object.keys(players).forEach((id) => {
-                const playerInfo = players[id];
+        // 모든 인스턴스 정보 받기
+        this.socket.on("currentInstances", (instances) => {
+            Object.keys(instances).forEach((id) => {
+                const instanceInfo = instances[id];
 
-                if (playerInfo.playerId == this.socket.id) {
-                    // 카메라 플레이어 고정
-                    this.myPlayer;
+                switch (instanceInfo.instanceType) {
+                    case "player":
+                        this.createPlayer(instanceInfo, instanceInfo.instanceId == this.socket.id);
+                        break;
+                    case "bullet":
+                        this.createBullet(instanceInfo);
+                        break;
                 }
-                this.addPlayer(playerInfo);
             });
-        });
-
-        // 새로운 플레이어 접속
-        this.socket.on("newPlayer", (playerInfo) => {
-            this.addPlayer(playerInfo);
         });
 
         // 플레이어 접속 끊김
         this.socket.on("disconnect", (playerId) => {
             this.players.getChildren().forEach((player) => {
-                if (playerId == player.playerId) {
+                if (playerId == player.instanceId) {
                     player.destroy();
                 }
             });
         });
 
-        // 게임 업데이트
-        this.socket.on("playerUpdates", (players) => {
-            Object.keys(players).forEach((id) => {
-                this.players.getChildren().forEach((player) => {
-                    const playerInfo = players[id];
+        // 새로운 플레이어 접속
+        this.socket.on("addPlayer", (playerInfo) => {
+            this.createPlayer(playerInfo, false);
+        });
 
-                    if (playerInfo.playerId == player.playerId) {
-                        // 플레이어 위치 설정
-                        player.setPosition(playerInfo.x, playerInfo.y);
+        // 플레이어 총알 발사
+        this.socket.on("addBullet", (bulletInfo) => {
+            this.createBullet(bulletInfo);
+        });
 
-                        // 플레이어 애니메이션 설정
-                        if (playerInfo.isMove) {
-                            player.anims.play(playerInfo.sprite + "_walk", true);
-                        } else {
-                            player.anims.play(playerInfo.sprite + "_idle", true);
-                        }
+        // 모든 인스턴스 업데이트
+        this.socket.on("instanceUpdates", (instances) => {
+            Object.keys(instances).forEach((id) => {
+                const instanceInfo = instances[id];
 
-                        // 플레이어 좌우반전 설정
-                        player.flipX = playerInfo.flipX;
-                    }
-                });
+                switch (instanceInfo.instanceType) {
+                    case "player":
+                        this.players.getChildren().forEach((player) => {
+                            if (instanceInfo.instanceId == player.instanceId) {
+                                // 위치 설정
+                                player.setPosition(instanceInfo.x, instanceInfo.y);
+
+                                // 애니메이션 설정
+                                if (instanceInfo.isMove) {
+                                    player.anims.play(instanceInfo.sprite + "_walk", true);
+                                } else {
+                                    player.anims.play(instanceInfo.sprite + "_idle", true);
+                                }
+
+                                // 좌우반전 설정
+                                player.flipX = instanceInfo.flipX;
+                            }
+                        });
+                        break;
+                    case "bullet":
+                        this.bullets.getChildren().forEach((bullet) => {
+                            if (instanceInfo.instanceId == bullet.instanceId) {
+                                // 위치 설정
+                                bullet.setPosition(instanceInfo.x, instanceInfo.y);
+                            }
+                        });
+                        break;
+                }
             });
         });
 
@@ -93,10 +113,10 @@ class IngameScene extends Phaser.Scene {
 
     update() {
         // 플레이어 이동 | 공격
-        let left = this.cursors.left.isDown;
-        let right = this.cursors.right.isDown;
-        let up = this.cursors.up.isDown;
-        let attack = this.cursors.space.isDown;
+        const left = this.cursors.left.isDown;
+        const right = this.cursors.right.isDown;
+        const up = this.cursors.up.isDown;
+        const attack = this.cursors.space.isDown;
 
         if (left || right || up || attack) {
             this.socket.emit("playerInput", {
@@ -108,11 +128,28 @@ class IngameScene extends Phaser.Scene {
         }
     }
 
-    addPlayer(playerInfo) {
-        const player = this.add
-            .sprite(playerInfo.x, playerInfo.y, playerInfo.sprite)
+    createPlayer(playerInfo, isMyPlayer) {
+        if (isMyPlayer) {
+            this.myPlayer = this.add
+                .sprite(playerInfo.x, playerInfo.y, playerInfo.sprite)
+                .setOrigin(0.5, 0.5);
+            this.players.add(this.myPlayer);
+            this.myPlayer.instanceId = playerInfo.instanceId;
+        } else {
+            const player = this.add
+                .sprite(playerInfo.x, playerInfo.y, playerInfo.sprite)
+                .setOrigin(0.5, 0.5);
+            this.players.add(player);
+            player.instanceId = playerInfo.instanceId;
+        }
+    }
+
+    createBullet(bulletInfo) {
+        const bullet = this.add
+            .sprite(bulletInfo.x, bulletInfo.y, bulletInfo.sprite)
             .setOrigin(0.5, 0.5);
-        this.players.add(player);
-        player.playerId = playerInfo.playerId;
+        this.bullets.add(bullet);
+        bullet.flipX = bulletInfo.flipX;
+        bullet.instanceId = bulletInfo.instanceId;
     }
 }
