@@ -63,6 +63,7 @@ function create() {
                 min = "0" + min;
             }
             this.timer = min + ":" + sec;
+            io.emit("setTimer", this.timer);
         },
         loop: true
     });
@@ -114,7 +115,7 @@ function create() {
                     }
 
                     // 공격
-                    if (inputData.attack) {
+                    if (inputData.attack && player.isAttack) {
                         const id = uuidgen();
                         instances[id] = {
                             instanceId: id,
@@ -124,6 +125,13 @@ function create() {
                             sprite: "bullet",
                             flipX: player.flipX
                         };
+                        player.attackAlarm = this.time.addEvent({
+                            delay: 100,
+                            callback: () => {
+                                player.isAttack = true;
+                            }
+                        });
+                        player.isAttack = false;
                         createBullet(this, instances[id]);
                         io.emit("addBullet", instances[id]);
                     }
@@ -160,6 +168,16 @@ function update() {
         const bulletInfo = instances[bullet.instanceId];
         bulletInfo.x = bullet.x;
         bulletInfo.y = bullet.y;
+
+        // 파괴
+        if (
+            this.physics.collide(bullet, this.worldLayer) ||
+            !Phaser.Geom.Rectangle.Overlaps(this.physics.world.bounds, bullet.getBounds())
+        ) {
+            bullet.destroy();
+            delete instances[bullet.instanceId];
+            io.emit("destroyBullet", bullet.instanceId);
+        }
     });
 
     // 모든 인스턴스 정보 보내기
@@ -176,6 +194,7 @@ function createPlayer(self, playerInfo) {
     player.body.setDragX(0.95);
     player.body.useDamping = true;
     player.instanceId = playerInfo.instanceId;
+    player.isAttack = true;
 }
 
 function createBullet(self, bulletInfo) {
@@ -183,7 +202,8 @@ function createBullet(self, bulletInfo) {
         .sprite(bulletInfo.x, bulletInfo.y, bulletInfo.sprite)
         .setOrigin(0.5, 0.5);
     self.bullets.add(bullet);
-    bullet.body.velocity.x = !bulletInfo.flipX ? 100 : -100;
+    bullet.body.allowGravity = false;
+    bullet.body.velocity.x = !bulletInfo.flipX ? 500 : -500;
     bullet.instanceId = bulletInfo.instanceId;
 }
 

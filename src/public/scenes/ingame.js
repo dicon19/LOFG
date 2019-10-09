@@ -62,6 +62,15 @@ class IngameScene extends Phaser.Scene {
             this.createBullet(bulletInfo);
         });
 
+        // 총알 파괴 이벤트
+        this.socket.on("destroyBullet", (bulletId) => {
+            this.bullets.getChildren().forEach((bullet) => {
+                if (bulletId == bullet.instanceId) {
+                    bullet.destroy();
+                }
+            });
+        });
+
         // 모든 인스턴스 업데이트
         this.socket.on("instanceUpdates", (instances) => {
             Object.keys(instances).forEach((id) => {
@@ -100,8 +109,12 @@ class IngameScene extends Phaser.Scene {
 
         // 핑 확인
         this.socket.on("latency", () => {
-            let latency = Date.now() - startTime;
-            this.pingText.setText(latency);
+            this.pingText.setText(Date.now() - startTime);
+        });
+
+        // 시간 불러오기
+        this.socket.on("setTimer", (timer) => {
+            this.timerText.setText(timer);
         });
 
         // 맵 불러오기
