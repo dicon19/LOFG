@@ -4,25 +4,31 @@ class MenuScene extends Phaser.Scene {
     }
 
     create() {
+        this.socket = io();
+
+        // 배경
         this.cameras.main.setBackgroundColor("#50bcdf");
 
+        // UI
         this.add
             .sprite(640, 180, "logo")
             .setOrigin(0.5, 0.5)
             .setDisplaySize(480, 240);
 
         this.onlineUserText = this.add
-            .text(640, 340, "너만 접속ㅎ", {
+            .text(640, 340, "", {
                 fontFamily: '"NanumGothic"',
                 fontSize: "24px"
             })
             .setOrigin(0.5, 0.5);
 
         this.element = this.add.dom(640, 400).createFromCache("nameform");
+        this.element.getChildByName("nameField").value = name;
         this.element.addListener("click");
         this.element.on("click", (event) => {
             if (event.target.name == "playButton") {
-                console.log("이름: " + this.element.getChildByName("nameField").value);
+                name = this.element.getChildByName("nameField").value;
+                this.socket.disconnect();
                 this.scene.start("ingameScene");
             }
         });
@@ -32,11 +38,20 @@ class MenuScene extends Phaser.Scene {
             .setOrigin(0.5, 0.5)
             .setDisplaySize(120, 120)
             .setInteractive()
-            .on("pointerdown", () => this.scene.start("customizeScene"));
+            .on("pointerdown", () => {
+                name = this.element.getChildByName("nameField").value;
+                this.socket.disconnect();
+                this.scene.start("customizeScene");
+            });
 
         this.facebook = this.add
             .sprite(1160, 640, "facebook")
             .setOrigin(0.5, 0.5)
             .setDisplaySize(120, 120);
+
+        // 접속중인 플레이어 수 받기
+        this.socket.on("getUsers", (users) => {
+            this.onlineUserText.setText(users + " 접속중");
+        });
     }
 }

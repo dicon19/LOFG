@@ -1,4 +1,4 @@
-const config = {
+const CONFIG = {
     type: Phaser.AUTO,
     parent: "phaser-example",
     width: 1280,
@@ -13,4 +13,12 @@ const config = {
     scene: [InitScene, MenuScene, CustomizeScene, IngameScene]
 };
 
-const game = new Phaser.Game(config);
+const GAME = new Phaser.Game(CONFIG);
+const SKINS = ["player1", "player2", "player3"];
+let name = "";
+let skin = choose(SKINS);
+
+// 유틸리티
+function choose(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+}

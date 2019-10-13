@@ -1,6 +1,6 @@
-const instances = {};
+const INSTANCES = {};
 
-const config = {
+const CONFIG = {
     autoFocus: false,
     type: Phaser.HEADLESS,
     parent: "phaser-example",
@@ -20,7 +20,7 @@ const config = {
         }
     }
 };
-const game = new Phaser.Game(config);
+const GAME = new Phaser.Game(CONFIG);
 
 // Phaser 3.19.0 헤드리스 오류 수정
 function WebGLTexture() {}
@@ -63,26 +63,32 @@ function create() {
                 min = "0" + min;
             }
             this.timer = min + ":" + sec;
-            io.emit("setTimer", this.timer);
+            io.emit("getTimer", this.timer);
         },
         loop: true
     });
 
     io.on("connection", (socket) => {
+        // 접속중인 플레이어 수 보내기
+        socket.emit("getUsers", Object.keys(io.sockets.sockets).length);
+
         // 새로운 플레이어 접속
-        console.log("a user connected");
-        instances[socket.id] = {
-            instanceId: socket.id,
-            instanceType: "player",
-            x: Math.floor(Math.random() * 1280),
-            y: 0,
-            sprite: choose(["player1", "player2", "player3"]),
-            isMove: false,
-            flipX: false
-        };
-        createPlayer(this, instances[socket.id]);
-        socket.emit("currentInstances", instances);
-        socket.broadcast.emit("addPlayer", instances[socket.id]);
+        socket.on("ingame", (name, skin) => {
+            console.log("a user connected");
+            INSTANCES[socket.id] = {
+                instanceId: socket.id,
+                instanceType: "player",
+                x: Math.floor(Math.random() * 1280),
+                y: 0,
+                name: name,
+                sprite: skin,
+                isMove: false,
+                flipX: false
+            };
+            createPlayer(this, INSTANCES[socket.id]);
+            socket.emit("currentInstances", INSTANCES);
+            socket.broadcast.emit("addPlayer", INSTANCES[socket.id]);
+        });
 
         // 플레이어 접속 끊김
         socket.on("disconnect", () => {
@@ -92,7 +98,7 @@ function create() {
                     player.destroy();
                 }
             });
-            delete instances[socket.id];
+            delete INSTANCES[socket.id];
             io.emit("disconnect", socket.id);
         });
 
@@ -116,9 +122,9 @@ function create() {
 
                     // 공격
                     if (inputData.attack && player.isAttack) {
-                        const id = uuidgen();
-                        instances[id] = {
-                            instanceId: id,
+                        const ID = uuidgen();
+                        INSTANCES[ID] = {
+                            instanceId: ID,
                             instanceType: "bullet",
                             x: player.x,
                             y: player.y,
@@ -132,8 +138,8 @@ function create() {
                             }
                         });
                         player.isAttack = false;
-                        createBullet(this, instances[id]);
-                        io.emit("addBullet", instances[id]);
+                        createBullet(this, INSTANCES[ID]);
+                        io.emit("addBullet", INSTANCES[ID]);
                     }
                 }
             });
@@ -156,57 +162,58 @@ function create() {
 function update() {
     // 플레이어 업데이트
     this.players.getChildren().forEach((player) => {
-        const playerInfo = instances[player.instanceId];
-        playerInfo.x = player.x;
-        playerInfo.y = player.y;
-        playerInfo.isMove = Math.abs(player.body.velocity.x) > 20;
-        playerInfo.flipX = player.flipX;
+        const PLAYER_INFO = INSTANCES[player.instanceId];
+        PLAYER_INFO.x = player.x;
+        PLAYER_INFO.y = player.y;
+        PLAYER_INFO.isMove = Math.abs(player.body.velocity.x) > 20;
+        PLAYER_INFO.flipX = player.flipX;
     });
 
     // 총알 업데이트
     this.bullets.getChildren().forEach((bullet) => {
-        const bulletInfo = instances[bullet.instanceId];
-        bulletInfo.x = bullet.x;
-        bulletInfo.y = bullet.y;
+        const BULLET_INFO = INSTANCES[bullet.instanceId];
+        BULLET_INFO.x = bullet.x;
+        BULLET_INFO.y = bullet.y;
 
-        // 파괴
+        // 파괴 처리
         if (
             this.physics.collide(bullet, this.worldLayer) ||
             !Phaser.Geom.Rectangle.Overlaps(this.physics.world.bounds, bullet.getBounds())
         ) {
             bullet.destroy();
-            delete instances[bullet.instanceId];
+            delete INSTANCES[bullet.instanceId];
             io.emit("destroyBullet", bullet.instanceId);
         }
     });
 
     // 모든 인스턴스 정보 보내기
-    io.emit("instanceUpdates", instances);
+    io.emit("instanceUpdates", INSTANCES);
 }
 
 function createPlayer(self, playerInfo) {
-    const player = self.physics.add
+    const PLAYER = self.physics.add
         .sprite(playerInfo.x, playerInfo.y, playerInfo.sprite)
         .setOrigin(0.5, 0.5);
-    self.players.add(player);
-    player.body.setBounce(0, 0.15);
-    player.body.setCollideWorldBounds(true);
-    player.body.setDragX(0.95);
-    player.body.useDamping = true;
-    player.instanceId = playerInfo.instanceId;
-    player.isAttack = true;
+    self.players.add(PLAYER);
+    PLAYER.body.setBounce(0, 0.15);
+    PLAYER.body.setCollideWorldBounds(true);
+    PLAYER.body.setDragX(0.95);
+    PLAYER.body.useDamping = true;
+    PLAYER.instanceId = playerInfo.instanceId;
+    PLAYER.isAttack = true;
 }
 
 function createBullet(self, bulletInfo) {
-    const bullet = self.physics.add
+    const BULLET = self.physics.add
         .sprite(bulletInfo.x, bulletInfo.y, bulletInfo.sprite)
         .setOrigin(0.5, 0.5);
-    self.bullets.add(bullet);
-    bullet.body.allowGravity = false;
-    bullet.body.velocity.x = !bulletInfo.flipX ? 500 : -500;
-    bullet.instanceId = bulletInfo.instanceId;
+    self.bullets.add(BULLET);
+    BULLET.body.allowGravity = false;
+    BULLET.body.velocity.x = !bulletInfo.flipX ? 500 : -500;
+    BULLET.instanceId = bulletInfo.instanceId;
 }
 
+// 유틸리티
 function choose(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
 }
