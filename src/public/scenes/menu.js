@@ -15,7 +15,7 @@ class MenuScene extends Phaser.Scene {
             .setOrigin(0.5, 0.5)
             .setDisplaySize(480, 240);
 
-        this.onlineUserText = this.add
+        this.onlinePlayerText = this.add
             .text(640, 340, "", {
                 fontFamily: '"NanumGothic"',
                 fontSize: "24px"
@@ -50,8 +50,8 @@ class MenuScene extends Phaser.Scene {
             .setDisplaySize(120, 120);
 
         // 접속중인 플레이어 수 받기
-        this.socket.on("getUsers", (users) => {
-            this.onlineUserText.setText(users + " 접속중");
+        this.socket.on("getPlayers", (players) => {
+            this.onlinePlayerText.setText(players + " 접속중");
         });
     }
 }

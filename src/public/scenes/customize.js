@@ -45,7 +45,9 @@ class CustomizeScene extends Phaser.Scene {
             .setOrigin(0.5, 0.5)
             .setDisplaySize(120, 120)
             .setInteractive()
-            .on("pointerdown", () => this.scene.start("menuScene"));
+            .on("pointerdown", () => {
+                this.scene.start("menuScene");
+            });
 
         this.player = this.add
             .sprite(640, 360, "player1")

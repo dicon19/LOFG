@@ -1,3 +1,4 @@
+let playerCount = 0;
 const INSTANCES = {};
 
 const CONFIG = {
@@ -70,11 +71,12 @@ function create() {
 
     io.on("connection", (socket) => {
         // 접속중인 플레이어 수 보내기
-        socket.emit("getUsers", Object.keys(io.sockets.sockets).length);
+        socket.emit("getPlayers", playerCount);
 
         // 새로운 플레이어 접속
         socket.on("ingame", (name, skin) => {
-            console.log("a user connected");
+            console.log("a player connected");
+            playerCount++;
             INSTANCES[socket.id] = {
                 instanceId: socket.id,
                 instanceType: "player",
@@ -88,18 +90,21 @@ function create() {
             createPlayer(this, INSTANCES[socket.id]);
             socket.emit("currentInstances", INSTANCES);
             socket.broadcast.emit("addPlayer", INSTANCES[socket.id]);
+            io.emit("getPlayers", playerCount);
         });
 
         // 플레이어 접속 끊김
         socket.on("disconnect", () => {
-            console.log("user disconnected");
             this.players.getChildren().forEach((player) => {
                 if (socket.id == player.instanceId) {
+                    console.log("player disconnected");
+                    playerCount--;
                     player.destroy();
+                    delete INSTANCES[socket.id];
+                    io.emit("disconnect", socket.id);
+                    io.emit("getPlayers", playerCount);
                 }
             });
-            delete INSTANCES[socket.id];
-            io.emit("disconnect", socket.id);
         });
 
         // 플레이어 입력
