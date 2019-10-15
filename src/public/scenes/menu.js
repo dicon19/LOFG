@@ -17,7 +17,7 @@ class MenuScene extends Phaser.Scene {
 
         this.onlinePlayerText = this.add
             .text(640, 340, "", {
-                fontFamily: '"NanumGothic"',
+                fontFamily: "NanumGothic",
                 fontSize: "24px"
             })
             .setOrigin(0.5, 0.5);

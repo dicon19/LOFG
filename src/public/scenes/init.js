@@ -14,11 +14,13 @@ class InitScene extends Phaser.Scene {
         this.load.image("player2", "assets/sprites/player2.png");
         this.load.image("player3", "assets/sprites/player3.png");
         this.load.image("bullet", "assets/sprites/bullet.png");
-        this.load.image("tiles", "assets/tilesets/four-seasons-tileset.png");
+        this.load.image("tileset1", "assets/tilesets/four-seasons-tileset.png");
+        this.load.image("tileset2", "assets/tilesets/[32x32] Rocky Grass.png");
 
         this.load.html("nameform", "assets/form/nameform.html");
 
-        this.load.tilemapTiledJSON("map", "assets/tilemaps/map.json");
+        this.load.tilemapTiledJSON("map1", "assets/tilemaps/map1.json");
+        this.load.tilemapTiledJSON("map2", "assets/tilemaps/map2.json");
 
         this.load.spritesheet("player1_walk", "assets/animations/player1_walk.png", {
             frameWidth: 32,

@@ -22,10 +22,7 @@ function setupAuthoritativePhaser() {
         .then((dom) => {
             dom.window.URL.createObjectURL = (blob) => {
                 if (blob) {
-                    return datauri.format(
-                        blob.type,
-                        blob[Object.getOwnPropertySymbols(blob)[0]]._buffer
-                    ).content;
+                    return datauri.format(blob.type, blob[Object.getOwnPropertySymbols(blob)[0]]._buffer).content;
                 }
             };
             dom.window.URL.revokeObjectURL = (objectURL) => {};

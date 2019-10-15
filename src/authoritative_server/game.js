@@ -32,9 +32,11 @@ function preload() {
     this.load.image("player2", "assets/sprites/player2.png");
     this.load.image("player3", "assets/sprites/player3.png");
     this.load.image("bullet", "assets/sprites/bullet.png");
-    this.load.image("tiles", "assets/tilesets/four-seasons-tileset.png");
+    this.load.image("tileset1", "assets/tilesets/four-seasons-tileset.png");
+    this.load.image("tileset2", "assets/tilesets/[32x32] Rocky Grass.png");
 
-    this.load.tilemapTiledJSON("map", "assets/tilemaps/map.json");
+    this.load.tilemapTiledJSON("map1", "assets/tilemaps/map1.json");
+    this.load.tilemapTiledJSON("map2", "assets/tilemaps/map2.json");
 }
 
 function create() {
@@ -157,11 +159,12 @@ function create() {
     });
 
     // 맵 불러오기
-    this.map = this.make.tilemap({ key: "map" });
-    this.tileset = this.map.addTilesetImage("tileset", "tiles");
+    this.map = this.make.tilemap({ key: "map2" });
+    this.tileset = this.map.addTilesetImage("[32x32] Rocky Grass", "tileset2");
     this.worldLayer = this.map.createStaticLayer("world", this.tileset, 0, 0);
     this.worldLayer.setCollisionByProperty({ solid: true });
     this.physics.add.collider(this.players, this.worldLayer);
+    this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 }
 
 function update() {
@@ -196,9 +199,7 @@ function update() {
 }
 
 function createPlayer(self, playerInfo) {
-    const PLAYER = self.physics.add
-        .sprite(playerInfo.x, playerInfo.y, playerInfo.sprite)
-        .setOrigin(0.5, 0.5);
+    const PLAYER = self.physics.add.sprite(playerInfo.x, playerInfo.y, playerInfo.sprite).setOrigin(0.5, 0.5);
     self.players.add(PLAYER);
     PLAYER.body.setBounce(0, 0.15);
     PLAYER.body.setCollideWorldBounds(true);
@@ -209,9 +210,7 @@ function createPlayer(self, playerInfo) {
 }
 
 function createBullet(self, bulletInfo) {
-    const BULLET = self.physics.add
-        .sprite(bulletInfo.x, bulletInfo.y, bulletInfo.sprite)
-        .setOrigin(0.5, 0.5);
+    const BULLET = self.physics.add.sprite(bulletInfo.x, bulletInfo.y, bulletInfo.sprite).setOrigin(0.5, 0.5);
     self.bullets.add(BULLET);
     BULLET.body.allowGravity = false;
     BULLET.body.velocity.x = !bulletInfo.flipX ? 500 : -500;

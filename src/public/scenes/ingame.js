@@ -12,15 +12,19 @@ class IngameScene extends Phaser.Scene {
         this.bullets = this.add.group();
 
         // UI
-        this.timerText = this.add.text(120, 60, "", {
-            fontFamily: '"NanumGothic"',
-            fontSize: "64px"
-        });
+        this.timerText = this.add
+            .text(120, 60, "", {
+                fontFamily: "NanumGothic",
+                fontSize: "64px"
+            })
+            .setScrollFactor(0);
 
-        this.pingText = this.add.text(340, 60, "", {
-            fontFamily: '"NanumGothic"',
-            fontSize: "32px"
-        });
+        this.pingText = this.add
+            .text(340, 60, "", {
+                fontFamily: "NanumGothic",
+                fontSize: "32px"
+            })
+            .setScrollFactor(0);
 
         // TODO 스코어 보드 구현
 
@@ -37,10 +41,7 @@ class IngameScene extends Phaser.Scene {
                 const INSTANCE_INFO = instances[id];
                 switch (INSTANCE_INFO.instanceType) {
                     case "player":
-                        this.createPlayer(
-                            INSTANCE_INFO,
-                            INSTANCE_INFO.instanceId == this.socket.id
-                        );
+                        this.createPlayer(INSTANCE_INFO, INSTANCE_INFO.instanceId == this.socket.id);
                         break;
                     case "bullet":
                         this.createBullet(INSTANCE_INFO);
@@ -119,10 +120,13 @@ class IngameScene extends Phaser.Scene {
         });
 
         // 맵 불러오기
-        this.map = this.make.tilemap({ key: "map" });
-        this.tileset = this.map.addTilesetImage("tileset", "tiles");
+        this.map = this.make.tilemap({ key: "map2" });
+        this.tileset = this.map.addTilesetImage("[32x32] Rocky Grass", "tileset2");
         this.worldLayer = this.map.createStaticLayer("world", this.tileset, 0, 0);
         this.worldLayer.setDepth(-100);
+
+        // 카메라 초기화
+        this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
     }
 
     update() {
@@ -143,28 +147,18 @@ class IngameScene extends Phaser.Scene {
     }
 
     createPlayer(playerInfo, isMyPlayer) {
-        if (isMyPlayer) {
-            this.myPlayer = this.add
-                .sprite(playerInfo.x, playerInfo.y, playerInfo.sprite)
-                .setOrigin(0.5, 0.5);
-            this.players.add(this.myPlayer);
-            this.myPlayer.instanceId = playerInfo.instanceId;
+        const PLAYER = this.add.sprite(playerInfo.x, playerInfo.y, playerInfo.sprite).setOrigin(0.5, 0.5);
+        this.players.add(PLAYER);
+        PLAYER.instanceId = playerInfo.instanceId;
 
-            // TODO 카메라 처리
+        if (isMyPlayer) {
+            this.cameras.main.startFollow(PLAYER, true, 0.1, 0.1);
             // TODO 이름, 체력바, 점수 UI 구현
-        } else {
-            const PLAYER = this.add
-                .sprite(playerInfo.x, playerInfo.y, playerInfo.sprite)
-                .setOrigin(0.5, 0.5);
-            this.players.add(PLAYER);
-            PLAYER.instanceId = playerInfo.instanceId;
         }
     }
 
     createBullet(bulletInfo) {
-        const BULLET = this.add
-            .sprite(bulletInfo.x, bulletInfo.y, bulletInfo.sprite)
-            .setOrigin(0.5, 0.5);
+        const BULLET = this.add.sprite(bulletInfo.x, bulletInfo.y, bulletInfo.sprite).setOrigin(0.5, 0.5);
         this.bullets.add(BULLET);
         BULLET.flipX = bulletInfo.flipX;
         BULLET.instanceId = bulletInfo.instanceId;
