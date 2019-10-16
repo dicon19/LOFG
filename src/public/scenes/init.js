@@ -19,6 +19,9 @@ class InitScene extends Phaser.Scene {
 
         this.load.html("nameform", "assets/form/nameform.html");
 
+        this.load.audio("bgm1", "assets/sounds/bgm/bgm1.mp3");
+        this.load.audio("hurt", "assets/sounds/sfx/hurt.mp3");
+
         this.load.tilemapTiledJSON("map1", "assets/tilemaps/map1.json");
         this.load.tilemapTiledJSON("map2", "assets/tilemaps/map2.json");
 
@@ -74,6 +77,9 @@ class InitScene extends Phaser.Scene {
             frameRate: 12,
             repeat: -1
         });
+
+        // 배경음악 재생
+        this.sound.play("bgm1");
 
         // 메뉴 씬 전환
         this.scene.start("menuScene");
