@@ -79,7 +79,7 @@ class InitScene extends Phaser.Scene {
         });
 
         // 배경음악 재생
-        this.sound.play("bgm1");
+        // this.sound.play("bgm1");
 
         // 메뉴 씬 전환
         this.scene.start("menuScene");

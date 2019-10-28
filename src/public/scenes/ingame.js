@@ -144,6 +144,11 @@ class IngameScene extends Phaser.Scene {
                 attack: ATTACK
             });
         }
+
+        this.players.getChildren().forEach((player) => {
+            player.scoreText.x = player.x;
+            player.scoreText.y = player.y - 50;
+        });
     }
 
     createPlayer(playerInfo, isMyPlayer) {
@@ -151,9 +156,13 @@ class IngameScene extends Phaser.Scene {
         this.players.add(PLAYER);
         PLAYER.instanceId = playerInfo.instanceId;
 
+        PLAYER.scoreText = this.add.text(playerInfo.x, playerInfo.y - 50, "12345", {
+            fontFamily: "NanumGothic",
+            fontSize: "32px"
+        });
+
         if (isMyPlayer) {
             this.cameras.main.startFollow(PLAYER, true, 0.1, 0.1);
-            // TODO 이름, 체력바, 점수 UI 구현
         }
     }
 
