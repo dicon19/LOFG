@@ -37,6 +37,70 @@ class InitScene extends Phaser.Scene {
             frameWidth: 32,
             frameHeight: 32
         });
+
+        // 로딩바
+        const LOADING_BAR_X = this.cameras.main.width / 2;
+        const LOADING_BAR_Y = this.cameras.main.height / 2;
+        this.progressBar = this.add.graphics();
+        this.progressBox = this.add.graphics();
+
+        this.progressBox.fillStyle(0x222222, 0.8);
+        this.progressBox.fillRect(LOADING_BAR_X - 160, LOADING_BAR_Y - 20, 320, 40);
+
+        this.loadingText = this.make
+            .text({
+                x: LOADING_BAR_X,
+                y: LOADING_BAR_Y - 50,
+                text: "잠시만 기다려주세요",
+                style: {
+                    font: "24px NanumGothic",
+                    fill: "#ffffff"
+                }
+            })
+            .setOrigin(0.5, 0.5);
+
+        this.percentText = this.make
+            .text({
+                x: LOADING_BAR_X,
+                y: LOADING_BAR_Y,
+                text: "0%",
+                style: {
+                    font: "18px NanumGothic",
+                    fill: "#ffffff"
+                }
+            })
+            .setOrigin(0.5, 0.5);
+
+        this.assetText = this.make
+            .text({
+                x: LOADING_BAR_X,
+                y: LOADING_BAR_Y + 50,
+                text: "",
+                style: {
+                    font: "18px NanumGothic",
+                    fill: "#ffffff"
+                }
+            })
+            .setOrigin(0.5, 0.5);
+
+        this.load.on("progress", (value) => {
+            this.progressBar.clear();
+            this.progressBar.fillStyle(0xffffff, 1);
+            this.progressBar.fillRect(LOADING_BAR_X - 155, LOADING_BAR_Y - 15, 310 * value, 30);
+            this.percentText.setText(parseInt(value * 100) + "%");
+        });
+
+        this.load.on("fileprogress", (file) => {
+            this.assetText.setText("Loading asset: " + file.key);
+        });
+
+        this.load.on("complete", () => {
+            this.progressBar.destroy();
+            this.progressBox.destroy();
+            this.loadingText.destroy();
+            this.percentText.destroy();
+            this.assetText.destroy();
+        });
     }
 
     create() {

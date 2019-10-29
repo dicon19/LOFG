@@ -86,6 +86,9 @@ function create() {
                 y: 0,
                 name: name,
                 sprite: skin,
+                score: 0,
+                hpMax: 100,
+                hp: 60,
                 isMove: false,
                 flipX: false
             };
@@ -183,7 +186,7 @@ function update() {
         BULLET_INFO.x = bullet.x;
         BULLET_INFO.y = bullet.y;
 
-        // 파괴 처리
+        // 충돌|파괴 처리
         if (
             this.physics.collide(bullet, this.worldLayer) ||
             !Phaser.Geom.Rectangle.Overlaps(this.physics.world.bounds, bullet.getBounds())

@@ -13,17 +13,19 @@ class IngameScene extends Phaser.Scene {
 
         // UI
         this.timerText = this.add
-            .text(120, 60, "", {
+            .text(120, 60, "00:00", {
                 fontFamily: "NanumGothic",
                 fontSize: "64px"
             })
+            .setDepth(100)
             .setScrollFactor(0);
 
         this.pingText = this.add
-            .text(340, 60, "", {
+            .text(340, 60, "0", {
                 fontFamily: "NanumGothic",
                 fontSize: "32px"
             })
+            .setDepth(100)
             .setScrollFactor(0);
 
         // TODO 스코어 보드 구현
@@ -145,22 +147,39 @@ class IngameScene extends Phaser.Scene {
             });
         }
 
+        // UI
         this.players.getChildren().forEach((player) => {
-            player.scoreText.x = player.x;
-            player.scoreText.y = player.y - 50;
+            player.text.setPosition(player.x, player.y - 42);
+            player.hpBox.clear();
+            player.hpBox.fillStyle(0xffffff, 0.8);
+            player.hpBox.fillRect(player.x - 24, player.y - 28, 48, 12);
+            player.hpBar.clear();
+            player.hpBar.fillStyle(0xff0000, 0.8);
+            player.hpBar.fillRect(player.x - 24, player.y - 28, (player.hp / player.hpMax) * 48, 12);
         });
     }
 
     createPlayer(playerInfo, isMyPlayer) {
         const PLAYER = this.add.sprite(playerInfo.x, playerInfo.y, playerInfo.sprite).setOrigin(0.5, 0.5);
         this.players.add(PLAYER);
+
         PLAYER.instanceId = playerInfo.instanceId;
+        PLAYER.name = playerInfo.name;
+        PLAYER.score = playerInfo.score;
+        PLAYER.hpMax = playerInfo.hpMax;
+        PLAYER.hp = playerInfo.hp;
 
-        PLAYER.scoreText = this.add.text(playerInfo.x, playerInfo.y - 50, "12345", {
-            fontFamily: "NanumGothic",
-            fontSize: "32px"
-        });
+        // 플레이어 UI
+        PLAYER.text = this.add
+            .text(playerInfo.x, playerInfo.y - 42, playerInfo.score + " " + playerInfo.name, {
+                fontFamily: "NanumGothic",
+                fontSize: "14px"
+            })
+            .setOrigin(0.5, 0.5);
+        PLAYER.hpBox = this.add.graphics();
+        PLAYER.hpBar = this.add.graphics();
 
+        // 플레이어 시점 카메라 고정
         if (isMyPlayer) {
             this.cameras.main.startFollow(PLAYER, true, 0.1, 0.1);
         }

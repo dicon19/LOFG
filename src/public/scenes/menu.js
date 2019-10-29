@@ -27,7 +27,11 @@ class MenuScene extends Phaser.Scene {
         this.element.addListener("click");
         this.element.on("click", (event) => {
             if (event.target.name == "playButton") {
-                name = this.element.getChildByName("nameField").value;
+                if (name != "") {
+                    name = this.element.getChildByName("nameField").value;
+                } else {
+                    name = "플레이어";
+                }
                 this.socket.disconnect();
                 this.scene.start("ingameScene");
             }
