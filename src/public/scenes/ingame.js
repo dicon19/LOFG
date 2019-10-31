@@ -11,7 +11,7 @@ class IngameScene extends Phaser.Scene {
         this.players = this.add.group();
         this.bullets = this.add.group();
 
-        // UI
+        //UI
         this.timerText = this.add
             .text(120, 60, "00:00", {
                 fontFamily: "NanumGothic",
@@ -20,13 +20,19 @@ class IngameScene extends Phaser.Scene {
             .setDepth(100)
             .setScrollFactor(0);
 
+        //타이머 아이콘
+        this.timer = this.add.sprite(this.timerText.x - 50, this.timerText.y + 50, "timer").setScrollFactor(0);
+
         this.pingText = this.add
-            .text(340, 60, "0", {
+            .text(390, 85, "0", {
                 fontFamily: "NanumGothic",
                 fontSize: "32px"
             })
             .setDepth(100)
             .setScrollFactor(0);
+
+        //핑아이콘
+        this.pingGood = this.add.sprite(this.pingText.x - 20, this.pingText.y + 15, "pingGood").setScrollFactor(0);
 
         // TODO 스코어 보드 구현
 
@@ -157,6 +163,23 @@ class IngameScene extends Phaser.Scene {
             player.hpBar.fillStyle(0xff0000, 0.8);
             player.hpBar.fillRect(player.x - 24, player.y - 28, (player.hp / player.hpMax) * 48, 12);
         });
+
+        //핑 아이콘 업데이트(미완성)
+        // if (parseInt(this.pingText) <= 100) {
+        //     this.pingNormal.destroy();
+        //     this.pingBad.destroy();
+        //     this.pingGood = this.add.sprite(this.pingText.x - 50, this.pingText.y + 150, "pingGood").setScrollFactor(0);
+        // } else if (parseInt(this.pingText) > 100) {
+        //     this.pingGood.destroy();
+        //     this.pingBad.destroy();
+        //     this.pingNormal = this.add
+        //         .sprite(this.pingText.x - 50, this.pingText.y + 150, "pingNormal")
+        //         .setScrollFactor(0);
+        // } else if (parseInt(this.pingText) > 200) {
+        //     this.pingNormal.destroy();
+        //     this.pingGood.destroy();
+        //     this.pingBad = this.add.sprite(this.pingText.x - 50, this.pingText.y + 150, "pingBad").setScrollFactor(0);
+        // }
     }
 
     createPlayer(playerInfo, isMyPlayer) {
