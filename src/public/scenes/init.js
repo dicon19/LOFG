@@ -10,16 +10,14 @@ class InitScene extends Phaser.Scene {
         this.load.image("facebook", "assets/sprites/facebook.png");
         this.load.image("arrow", "assets/sprites/arrow.png");
         this.load.image("button", "assets/sprites/button.png");
+        this.load.image("timer", "assets/sprites/timer.png");
+        this.load.image("ping", "assets/sprites/ping.png");
         this.load.image("player1", "assets/sprites/player1.png");
         this.load.image("player2", "assets/sprites/player2.png");
         this.load.image("player3", "assets/sprites/player3.png");
         this.load.image("bullet", "assets/sprites/bullet.png");
         this.load.image("tileset1", "assets/tilesets/four-seasons-tileset.png");
         this.load.image("tileset2", "assets/tilesets/[32x32] Rocky Grass.png");
-        this.load.image("timer", "assets/sprites/timer.png");
-        this.load.image("pingGood", "assets/sprites/pinggood.png");
-        this.load.image("pingNormal", "assets/sprites/pingnormal.png");
-        this.load.image("pingBad", "assets/sprites/pingbad.png");
 
         this.load.html("nameform", "assets/form/nameform.html");
 
