@@ -187,6 +187,13 @@ function update() {
         BULLET_INFO.y = bullet.y;
 
         // 충돌|파괴 처리
+        this.physics.overlap(this.players, this.bullets, (player) => {
+            player.hp -= bullet.damage;
+        });
+
+        // TODO 플레이어 넉백 구현
+        // TODO collide overlap 교체
+
         if (
             this.physics.collide(bullet, this.worldLayer) ||
             !Phaser.Geom.Rectangle.Overlaps(this.physics.world.bounds, bullet.getBounds())
@@ -210,6 +217,8 @@ function createPlayer(self, playerInfo) {
     PLAYER.body.useDamping = true;
     PLAYER.instanceId = playerInfo.instanceId;
     PLAYER.isAttack = true;
+    PLAYER.hpMax = 100;
+    PLAYER.hp = 60;
 }
 
 function createBullet(self, bulletInfo) {
