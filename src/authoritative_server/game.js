@@ -88,7 +88,7 @@ function create() {
                 sprite: skin,
                 score: 0,
                 hpMax: 100,
-                hp: 60,
+                hp: 100,
                 isMove: false,
                 flipX: false
             };
@@ -127,7 +127,7 @@ function create() {
 
                     // 점프
                     if (inputData.up && player.body.onFloor()) {
-                        player.body.setVelocityY(-500);
+                        player.body.setVelocityY(-400);
                     }
 
                     // 공격
@@ -139,10 +139,11 @@ function create() {
                             x: player.x,
                             y: player.y,
                             sprite: "bullet",
+                            attackAt: player.instanceId,
                             flipX: player.flipX
                         };
                         player.attackAlarm = this.time.addEvent({
-                            delay: 100,
+                            delay: player.attackDelayTime,
                             callback: () => {
                                 player.isAttack = true;
                             }
@@ -176,6 +177,7 @@ function update() {
         const PLAYER_INFO = INSTANCES[player.instanceId];
         PLAYER_INFO.x = player.x;
         PLAYER_INFO.y = player.y;
+        PLAYER_INFO.hp = player.hp;
         PLAYER_INFO.isMove = Math.abs(player.body.velocity.x) > 20;
         PLAYER_INFO.flipX = player.flipX;
     });
@@ -188,37 +190,43 @@ function update() {
 
         // 충돌|파괴 처리
         this.physics.overlap(this.players, this.bullets, (player) => {
-            player.hp -= bullet.damage;
+            if (player.instanceId != bullet.attackAt) {
+                if (player.hp > bullet.damage) {
+                    player.hp -= bullet.damage;
+                } else {
+                    // TODO 사망 구현
+                }
+                player.body.setVelocityX(bullet.knockbackPower * !bullet.flipX ? 500 : -500);
+                player.body.setVelocityY(-bullet.knockbackPower * 200);
+                destroyBullet(bullet);
+            }
         });
-
-        // TODO 플레이어 넉백 구현
-        // TODO collide overlap 교체
 
         if (
             this.physics.collide(bullet, this.worldLayer) ||
             !Phaser.Geom.Rectangle.Overlaps(this.physics.world.bounds, bullet.getBounds())
         ) {
-            bullet.destroy();
-            delete INSTANCES[bullet.instanceId];
-            io.emit("destroyBullet", bullet.instanceId);
+            destroyBullet(bullet);
         }
     });
 
     // 모든 인스턴스 정보 보내기
-    io.emit("instanceUpdates", INSTANCES);
+    io.emit("instanceUpdates", INSTANCES, Date.now());
 }
 
 function createPlayer(self, playerInfo) {
     const PLAYER = self.physics.add.sprite(playerInfo.x, playerInfo.y, playerInfo.sprite).setOrigin(0.5, 0.5);
     self.players.add(PLAYER);
-    PLAYER.body.setBounce(0, 0.15);
+    PLAYER.body.setBounce(0, 0);
     PLAYER.body.setCollideWorldBounds(true);
     PLAYER.body.setDragX(0.95);
     PLAYER.body.useDamping = true;
+
     PLAYER.instanceId = playerInfo.instanceId;
+    PLAYER.hpMax = playerInfo.hpMax;
+    PLAYER.hp = playerInfo.hp;
     PLAYER.isAttack = true;
-    PLAYER.hpMax = 100;
-    PLAYER.hp = 60;
+    PLAYER.attackDelayTime = 100;
 }
 
 function createBullet(self, bulletInfo) {
@@ -226,7 +234,18 @@ function createBullet(self, bulletInfo) {
     self.bullets.add(BULLET);
     BULLET.body.allowGravity = false;
     BULLET.body.velocity.x = !bulletInfo.flipX ? 500 : -500;
+
     BULLET.instanceId = bulletInfo.instanceId;
+    BULLET.attackAt = bulletInfo.attackAt;
+    BULLET.flipX = bulletInfo.flipX;
+    BULLET.damage = 3;
+    BULLET.knockbackPower = 1;
+}
+
+function destroyBullet(bullet) {
+    bullet.destroy();
+    delete INSTANCES[bullet.instanceId];
+    io.emit("destroyBullet", bullet.instanceId);
 }
 
 // 유틸리티

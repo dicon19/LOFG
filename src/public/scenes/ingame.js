@@ -60,6 +60,9 @@ class IngameScene extends Phaser.Scene {
         this.socket.on("disconnect", (playerId) => {
             this.players.getChildren().forEach((player) => {
                 if (playerId == player.instanceId) {
+                    player.text.destroy();
+                    player.hpBox.destroy();
+                    player.hpBar.destroy();
                     player.destroy();
                 }
             });
@@ -85,7 +88,10 @@ class IngameScene extends Phaser.Scene {
         });
 
         // 모든 인스턴스 업데이트
-        this.socket.on("instanceUpdates", (instances) => {
+        this.socket.on("instanceUpdates", (instances, time) => {
+            this.delta = Date.now() / time;
+            console.log(this.delta);
+
             Object.keys(instances).forEach((id) => {
                 const INSTANCE_INFO = instances[id];
 
@@ -93,21 +99,24 @@ class IngameScene extends Phaser.Scene {
                     case "player":
                         this.players.getChildren().forEach((player) => {
                             if (INSTANCE_INFO.instanceId == player.instanceId) {
-                                player.setPosition(INSTANCE_INFO.x, INSTANCE_INFO.y);
-                                player.flipX = INSTANCE_INFO.flipX;
+                                player.dx = INSTANCE_INFO.x;
+                                player.dy = INSTANCE_INFO.y;
+                                player.hp = INSTANCE_INFO.hp;
 
                                 if (INSTANCE_INFO.isMove) {
                                     player.anims.play(INSTANCE_INFO.sprite + "_walk", true);
                                 } else {
                                     player.anims.play(INSTANCE_INFO.sprite + "_idle", true);
                                 }
+                                player.flipX = INSTANCE_INFO.flipX;
                             }
                         });
                         break;
                     case "bullet":
                         this.bullets.getChildren().forEach((bullet) => {
                             if (INSTANCE_INFO.instanceId == bullet.instanceId) {
-                                bullet.setPosition(INSTANCE_INFO.x, INSTANCE_INFO.y);
+                                bullet.dx = INSTANCE_INFO.x;
+                                bullet.dy = INSTANCE_INFO.y;
                             }
                         });
                         break;
@@ -145,6 +154,17 @@ class IngameScene extends Phaser.Scene {
     }
 
     update() {
+        // 위치 보간
+        this.players.getChildren().forEach((player) => {
+            player.x += (player.dx - player.x) * this.delta;
+            player.y += (player.dy - player.y) * this.delta;
+        });
+
+        this.bullets.getChildren().forEach((bullet) => {
+            bullet.x += (bullet.dx - bullet.x) * this.delta;
+            bullet.y += (bullet.dy - bullet.y) * this.delta;
+        });
+
         // 플레이어 이동 | 공격
         const LEFT = this.cursors.left.isDown;
         const RIGHT = this.cursors.right.isDown;
@@ -177,6 +197,8 @@ class IngameScene extends Phaser.Scene {
         this.players.add(PLAYER);
 
         PLAYER.instanceId = playerInfo.instanceId;
+        PLAYER.dx = playerInfo.x;
+        PLAYER.dy = playerInfo.y;
         PLAYER.name = playerInfo.name;
         PLAYER.score = playerInfo.score;
         PLAYER.hpMax = playerInfo.hpMax;
@@ -201,7 +223,10 @@ class IngameScene extends Phaser.Scene {
     createBullet(bulletInfo) {
         const BULLET = this.add.sprite(bulletInfo.x, bulletInfo.y, bulletInfo.sprite).setOrigin(0.5, 0.5);
         this.bullets.add(BULLET);
-        BULLET.flipX = bulletInfo.flipX;
+
         BULLET.instanceId = bulletInfo.instanceId;
+        BULLET.dx = bulletInfo.x;
+        BULLET.dy = bulletInfo.y;
+        BULLET.flipX = bulletInfo.flipX;
     }
 }
