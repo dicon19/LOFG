@@ -11,29 +11,6 @@ class IngameScene extends Phaser.Scene {
         this.players = this.add.group();
         this.bullets = this.add.group();
 
-        // UI
-        this.timerText = this.add
-            .text(120, 60, "00:00", {
-                fontFamily: "NanumGothic",
-                fontSize: "64px"
-            })
-            .setDepth(100)
-            .setScrollFactor(0);
-
-        this.timer = this.add.sprite(this.timerText.x - 50, this.timerText.y + 50, "timer").setScrollFactor(0);
-
-        this.pingText = this.add
-            .text(390, 85, "0", {
-                fontFamily: "NanumGothic",
-                fontSize: "32px"
-            })
-            .setDepth(100)
-            .setScrollFactor(0);
-
-        this.ping = this.add.sprite(this.pingText.x - 20, this.pingText.y + 15, "ping").setScrollFactor(0);
-
-        // TODO 스코어 보드 구현
-
         // 핑 보내기
         let startTime;
         setInterval(() => {
@@ -41,10 +18,50 @@ class IngameScene extends Phaser.Scene {
             this.socket.emit("latency");
         }, 1000);
 
+        // #region UI
+        // 타이머
+        this.timer = this.add
+            .sprite(80, 100, "timer")
+            .setScrollFactor(0)
+            .setDisplaySize(48, 48);
+        this.timerText = this.add
+            .text(120, 70, "00:00", {
+                fontFamily: "NanumGothic",
+                fontSize: "48px"
+            })
+            .setDepth(100)
+            .setScrollFactor(0);
+
+        // 핑
+        this.ping = this.add
+            .sprite(360, 100, "ping")
+            .setScrollFactor(0)
+            .setDisplaySize(32, 32);
+        this.pingText = this.add
+            .text(390, 85, "0", {
+                fontFamily: "NanumGothic",
+                fontSize: "28px"
+            })
+            .setDepth(100)
+            .setScrollFactor(0);
+
+        // 랭킹
+        this.rank = this.add
+            .text(
+                1080,
+                80,
+                "#1anggimoddi  013\n#2junhaddiiiii    12\n#3anggimoddi  013\n#4junhaddiiiii    12\n#5anggimoddi  013\n#6junhaddiiiii    12"
+            )
+            .setDepth(100)
+            .setScrollFactor(0);
+        // #endregion
+
+        // #region 소켓 수신
         // 모든 인스턴스 정보 받기
         this.socket.on("currentInstances", (instances) => {
             Object.keys(instances).forEach((id) => {
                 const INSTANCE_INFO = instances[id];
+
                 switch (INSTANCE_INFO.instanceType) {
                     case "player":
                         this.createPlayer(INSTANCE_INFO, INSTANCE_INFO.instanceId == this.socket.id);
@@ -88,10 +105,7 @@ class IngameScene extends Phaser.Scene {
         });
 
         // 모든 인스턴스 업데이트
-        this.socket.on("instanceUpdates", (instances, time) => {
-            this.delta = Date.now() / time;
-            console.log(this.delta);
-
+        this.socket.on("instanceUpdates", (instances) => {
             Object.keys(instances).forEach((id) => {
                 const INSTANCE_INFO = instances[id];
 
@@ -124,7 +138,12 @@ class IngameScene extends Phaser.Scene {
             });
         });
 
-        // 핑 확인
+        // 타이머 시간 받기
+        this.socket.on("getTimer", (timer) => {
+            this.timerText.setText(timer);
+        });
+
+        // 핑 받기
         this.socket.on("latency", () => {
             const LATENCY = Date.now() - startTime;
             this.pingText.setText(LATENCY);
@@ -137,11 +156,7 @@ class IngameScene extends Phaser.Scene {
                 this.ping.setTint(0xff0000);
             }
         });
-
-        // 시간 불러오기
-        this.socket.on("getTimer", (timer) => {
-            this.timerText.setText(timer);
-        });
+        // #endregion
 
         // 맵 불러오기
         this.map = this.make.tilemap({ key: "map2" });
@@ -156,13 +171,24 @@ class IngameScene extends Phaser.Scene {
     update() {
         // 위치 보간
         this.players.getChildren().forEach((player) => {
-            player.x += (player.dx - player.x) * this.delta;
-            player.y += (player.dy - player.y) * this.delta;
+            player.x += (player.dx - player.x) * 0.5;
+            player.y += (player.dy - player.y) * 0.5;
         });
 
         this.bullets.getChildren().forEach((bullet) => {
-            bullet.x += (bullet.dx - bullet.x) * this.delta;
-            bullet.y += (bullet.dy - bullet.y) * this.delta;
+            bullet.x += (bullet.dx - bullet.x) * 0.5;
+            bullet.y += (bullet.dy - bullet.y) * 0.5;
+        });
+
+        // UI
+        this.players.getChildren().forEach((player) => {
+            player.text.setPosition(player.x, player.y - 42);
+            player.hpBox.clear();
+            player.hpBox.fillStyle(0xffffff, 0.8);
+            player.hpBox.fillRect(player.x - 24, player.y - 28, 48, 12);
+            player.hpBar.clear();
+            player.hpBar.fillStyle(0xff0000, 0.8);
+            player.hpBar.fillRect(player.x - 24, player.y - 28, (player.hp / player.hpMax) * 48, 12);
         });
 
         // 플레이어 이동 | 공격
@@ -179,17 +205,6 @@ class IngameScene extends Phaser.Scene {
                 attack: ATTACK
             });
         }
-
-        // UI
-        this.players.getChildren().forEach((player) => {
-            player.text.setPosition(player.x, player.y - 42);
-            player.hpBox.clear();
-            player.hpBox.fillStyle(0xffffff, 0.8);
-            player.hpBox.fillRect(player.x - 24, player.y - 28, 48, 12);
-            player.hpBar.clear();
-            player.hpBar.fillStyle(0xff0000, 0.8);
-            player.hpBar.fillRect(player.x - 24, player.y - 28, (player.hp / player.hpMax) * 48, 12);
-        });
     }
 
     createPlayer(playerInfo, isMyPlayer) {
@@ -216,7 +231,7 @@ class IngameScene extends Phaser.Scene {
 
         // 플레이어 시점 카메라 고정
         if (isMyPlayer) {
-            this.cameras.main.startFollow(PLAYER, true, 0.1, 0.1);
+            this.cameras.main.startFollow(PLAYER, true, 0.05, 0.05);
         }
     }
 

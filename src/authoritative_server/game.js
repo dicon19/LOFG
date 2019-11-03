@@ -28,13 +28,13 @@ function WebGLTexture() {}
 
 function preload() {
     // 리소스 불러오기
+    this.load.image("bullet", "assets/sprites/bullet.png");
     this.load.image("player1", "assets/sprites/player1.png");
     this.load.image("player2", "assets/sprites/player2.png");
     this.load.image("player3", "assets/sprites/player3.png");
-    this.load.image("bullet", "assets/sprites/bullet.png");
+
     this.load.image("tileset1", "assets/tilesets/four-seasons-tileset.png");
     this.load.image("tileset2", "assets/tilesets/[32x32] Rocky Grass.png");
-
     this.load.tilemapTiledJSON("map1", "assets/tilemaps/map1.json");
     this.load.tilemapTiledJSON("map2", "assets/tilemaps/map2.json");
 }
@@ -188,7 +188,7 @@ function update() {
         BULLET_INFO.x = bullet.x;
         BULLET_INFO.y = bullet.y;
 
-        // 충돌|파괴 처리
+        // 충돌 | 파괴 처리
         this.physics.overlap(this.players, this.bullets, (player) => {
             if (player.instanceId != bullet.attackAt) {
                 if (player.hp > bullet.damage) {
@@ -211,14 +211,13 @@ function update() {
     });
 
     // 모든 인스턴스 정보 보내기
-    io.emit("instanceUpdates", INSTANCES, Date.now());
+    io.emit("instanceUpdates", INSTANCES);
 }
 
 function createPlayer(self, playerInfo) {
-    const PLAYER = self.physics.add.sprite(playerInfo.x, playerInfo.y, playerInfo.sprite).setOrigin(0.5, 0.5);
+    const PLAYER = self.physics.add.sprite(playerInfo.x, playerInfo.y, playerInfo.sprite);
     self.players.add(PLAYER);
     PLAYER.body.setBounce(0, 0);
-    PLAYER.body.setCollideWorldBounds(true);
     PLAYER.body.setDragX(0.95);
     PLAYER.body.useDamping = true;
 
@@ -230,7 +229,7 @@ function createPlayer(self, playerInfo) {
 }
 
 function createBullet(self, bulletInfo) {
-    const BULLET = self.physics.add.sprite(bulletInfo.x, bulletInfo.y, bulletInfo.sprite).setOrigin(0.5, 0.5);
+    const BULLET = self.physics.add.sprite(bulletInfo.x, bulletInfo.y, bulletInfo.sprite);
     self.bullets.add(BULLET);
     BULLET.body.allowGravity = false;
     BULLET.body.velocity.x = !bulletInfo.flipX ? 500 : -500;
@@ -248,7 +247,7 @@ function destroyBullet(bullet) {
     io.emit("destroyBullet", bullet.instanceId);
 }
 
-// 유틸리티
+// #region 유틸리티
 function choose(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -259,5 +258,6 @@ function uuidgen() {
     }
     return s4() + s4() + "-" + s4() + "-" + s4() + "-" + s4() + "-" + s4() + s4() + s4();
 }
+// #endregion
 
 window.gameLoaded();

@@ -18,7 +18,8 @@ const SKINS = ["player1", "player2", "player3"];
 let name = "";
 let skin = choose(SKINS);
 
-// 유틸리티
+// #region 유틸리티
 function choose(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
 }
+// #endregion

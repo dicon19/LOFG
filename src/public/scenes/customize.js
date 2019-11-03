@@ -6,10 +6,11 @@ class CustomizeScene extends Phaser.Scene {
     create() {
         this.pos = SKINS.indexOf(skin);
 
-        // 배경
+        // 배경 초기화
         this.cameras.main.setBackgroundColor("#81c147");
 
-        // UI
+        // #region UI
+        // <=
         this.leftArrow = this.add
             .sprite(320, 360, "arrow")
             .setOrigin(0.5, 0.5)
@@ -25,6 +26,7 @@ class CustomizeScene extends Phaser.Scene {
                 this.player.anims.play(skin + "_walk", true);
             }).flipX = true;
 
+        // =>
         this.rightArrow = this.add
             .sprite(960, 360, "arrow")
             .setOrigin(0.5, 0.5)
@@ -40,6 +42,7 @@ class CustomizeScene extends Phaser.Scene {
                 this.player.anims.play(skin + "_walk", true);
             });
 
+        // 메뉴 씬 이동 버튼
         this.selectButton = this.add
             .sprite(640, 520, "button")
             .setOrigin(0.5, 0.5)
@@ -49,10 +52,12 @@ class CustomizeScene extends Phaser.Scene {
                 this.scene.start("menuScene");
             });
 
+        // 캐릭터
         this.player = this.add
-            .sprite(640, 360, "player1")
+            .sprite(640, 360, skin)
             .setOrigin(0.5, 0.5)
             .setDisplaySize(128, 128)
             .anims.play(skin + "_walk", true);
+        // #endregion
     }
 }

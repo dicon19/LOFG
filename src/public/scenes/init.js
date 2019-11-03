@@ -4,7 +4,7 @@ class InitScene extends Phaser.Scene {
     }
 
     preload() {
-        // 리소스 불러오기
+        // #region 리소스 불러오기
         this.load.image("logo", "assets/sprites/logo.png");
         this.load.image("customize", "assets/sprites/customize.png");
         this.load.image("facebook", "assets/sprites/facebook.png");
@@ -12,21 +12,16 @@ class InitScene extends Phaser.Scene {
         this.load.image("button", "assets/sprites/button.png");
         this.load.image("timer", "assets/sprites/timer.png");
         this.load.image("ping", "assets/sprites/ping.png");
-        this.load.image("player1", "assets/sprites/player1.png");
-        this.load.image("player2", "assets/sprites/player2.png");
-        this.load.image("player3", "assets/sprites/player3.png");
         this.load.image("bullet", "assets/sprites/bullet.png");
+
         this.load.image("tileset1", "assets/tilesets/four-seasons-tileset.png");
         this.load.image("tileset2", "assets/tilesets/[32x32] Rocky Grass.png");
-
-        this.load.html("nameform", "assets/form/nameform.html");
-
-        this.load.audio("bgm1", "assets/sounds/bgm/bgm1.mp3");
-        this.load.audio("hurt", "assets/sounds/sfx/hurt.mp3");
-
         this.load.tilemapTiledJSON("map1", "assets/tilemaps/map1.json");
         this.load.tilemapTiledJSON("map2", "assets/tilemaps/map2.json");
 
+        this.load.image("player1", "assets/sprites/player1.png");
+        this.load.image("player2", "assets/sprites/player2.png");
+        this.load.image("player3", "assets/sprites/player3.png");
         this.load.spritesheet("player1_walk", "assets/animations/player1_walk.png", {
             frameWidth: 32,
             frameHeight: 32
@@ -40,7 +35,13 @@ class InitScene extends Phaser.Scene {
             frameHeight: 32
         });
 
-        // 로딩바
+        this.load.html("nameform", "assets/form/nameform.html");
+
+        this.load.audio("bgm1", "assets/sounds/bgm/bgm1.mp3");
+        this.load.audio("hurt", "assets/sounds/sfx/hurt.mp3");
+        // #endregion
+
+        // #region 로딩바
         const LOADING_BAR_X = this.cameras.main.width / 2;
         const LOADING_BAR_Y = this.cameras.main.height / 2;
         this.progressBar = this.add.graphics();
@@ -103,10 +104,11 @@ class InitScene extends Phaser.Scene {
             this.percentText.destroy();
             this.assetText.destroy();
         });
+        // #endregion
     }
 
     create() {
-        // 애니메이션 추가
+        // #region 애니메이션 추가
         this.anims.create({
             key: "player1_idle",
             frames: [{ key: "player1" }],
@@ -143,11 +145,9 @@ class InitScene extends Phaser.Scene {
             frameRate: 12,
             repeat: -1
         });
+        // #endregion
 
-        // 배경음악 재생
-        // this.sound.play("bgm1");
-
-        // 메뉴 씬 전환
+        // 메뉴 씬 이동
         this.scene.start("menuScene");
     }
 }
