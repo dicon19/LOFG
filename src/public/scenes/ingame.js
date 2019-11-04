@@ -115,6 +115,7 @@ class IngameScene extends Phaser.Scene {
                             if (INSTANCE_INFO.instanceId == player.instanceId) {
                                 player.dx = INSTANCE_INFO.x;
                                 player.dy = INSTANCE_INFO.y;
+                                player.score = INSTANCE_INFO.score;
                                 player.hp = INSTANCE_INFO.hp;
 
                                 if (INSTANCE_INFO.isMove) {
@@ -174,7 +175,6 @@ class IngameScene extends Phaser.Scene {
             player.x += (player.dx - player.x) * 0.5;
             player.y += (player.dy - player.y) * 0.5;
         });
-
         this.bullets.getChildren().forEach((bullet) => {
             bullet.x += (bullet.dx - bullet.x) * 0.5;
             bullet.y += (bullet.dy - bullet.y) * 0.5;
@@ -182,10 +182,13 @@ class IngameScene extends Phaser.Scene {
 
         // UI
         this.players.getChildren().forEach((player) => {
+            player.text.setText(player.score + " " + player.name);
             player.text.setPosition(player.x, player.y - 42);
+
             player.hpBox.clear();
             player.hpBox.fillStyle(0xffffff, 0.8);
             player.hpBox.fillRect(player.x - 24, player.y - 28, 48, 12);
+
             player.hpBar.clear();
             player.hpBar.fillStyle(0xff0000, 0.8);
             player.hpBar.fillRect(player.x - 24, player.y - 28, (player.hp / player.hpMax) * 48, 12);

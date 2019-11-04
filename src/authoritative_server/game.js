@@ -71,6 +71,7 @@ function create() {
         loop: true
     });
 
+    // 소켓 수신
     io.on("connection", (socket) => {
         // 접속중인 플레이어 수 보내기
         socket.emit("getPlayers", playerCount);
@@ -83,12 +84,13 @@ function create() {
                 instanceId: socket.id,
                 instanceType: "player",
                 x: Math.floor(Math.random() * 1280),
-                y: 0,
+                y: 100,
                 name: name,
                 sprite: skin,
                 score: 0,
                 hpMax: 100,
                 hp: 100,
+                deadAt: null,
                 isMove: false,
                 flipX: false
             };
@@ -167,8 +169,26 @@ function create() {
     this.tileset = this.map.addTilesetImage("[32x32] Rocky Grass", "tileset2");
     this.worldLayer = this.map.createStaticLayer("world", this.tileset, 0, 0);
     this.worldLayer.setCollisionByProperty({ solid: true });
-    this.physics.add.collider(this.players, this.worldLayer);
     this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
+
+    // 충돌 | 파괴 처리
+    this.physics.add.collider(this.players, this.worldLayer);
+    this.physics.add.collider(this.players, this.bullets, (player, bullet) => {
+        if (player.instanceId != bullet.attackAt) {
+            if (player.hp > bullet.damage) {
+                player.hp -= bullet.damage;
+            } else {
+                player.deadAt = bullet.attackAt;
+                playerDead(this, player);
+            }
+            player.body.setVelocityX(bullet.knockbackPower * !bullet.flipX ? 500 : -500);
+            player.body.setVelocityY(-bullet.knockbackPower * 200);
+            destroyBullet(bullet);
+        }
+    });
+    this.physics.add.collider(this.bullets, this.worldLayer, (bullet) => {
+        destroyBullet(bullet);
+    });
 }
 
 function update() {
@@ -180,6 +200,10 @@ function update() {
         PLAYER_INFO.hp = player.hp;
         PLAYER_INFO.isMove = Math.abs(player.body.velocity.x) > 20;
         PLAYER_INFO.flipX = player.flipX;
+
+        if (!Phaser.Geom.Rectangle.Overlaps(this.physics.world.bounds, player.getBounds())) {
+            playerDead(this, player);
+        }
     });
 
     // 총알 업데이트
@@ -188,24 +212,7 @@ function update() {
         BULLET_INFO.x = bullet.x;
         BULLET_INFO.y = bullet.y;
 
-        // 충돌 | 파괴 처리
-        this.physics.overlap(this.players, this.bullets, (player) => {
-            if (player.instanceId != bullet.attackAt) {
-                if (player.hp > bullet.damage) {
-                    player.hp -= bullet.damage;
-                } else {
-                    // TODO 사망 구현
-                }
-                player.body.setVelocityX(bullet.knockbackPower * !bullet.flipX ? 500 : -500);
-                player.body.setVelocityY(-bullet.knockbackPower * 200);
-                destroyBullet(bullet);
-            }
-        });
-
-        if (
-            this.physics.collide(bullet, this.worldLayer) ||
-            !Phaser.Geom.Rectangle.Overlaps(this.physics.world.bounds, bullet.getBounds())
-        ) {
+        if (!Phaser.Geom.Rectangle.Overlaps(this.physics.world.bounds, bullet.getBounds())) {
             destroyBullet(bullet);
         }
     });
@@ -247,11 +254,20 @@ function destroyBullet(bullet) {
     io.emit("destroyBullet", bullet.instanceId);
 }
 
-// #region 유틸리티
-function choose(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
+function playerDead(self, player) {
+    if (player.deadAt != null) {
+        INSTANCES[player.deadAt].score++;
+        player.attackAt = null;
+    } else {
+        // 자살
+        INSTANCES[player.instanceId].score--;
+    }
+    player.x = Math.floor(Math.random() * 1280);
+    player.y = 100;
+    player.hp = player.hpMax;
 }
 
+// #region 유틸리티
 function uuidgen() {
     function s4() {
         return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
