@@ -22,15 +22,15 @@ class InitScene extends Phaser.Scene {
         this.load.image("player1", "assets/sprites/player1.png");
         this.load.image("player2", "assets/sprites/player2.png");
         this.load.image("player3", "assets/sprites/player3.png");
-        this.load.spritesheet("player1_walk", "assets/animations/player1_walk.png", {
+        this.load.spritesheet("player1_move", "assets/animations/player1_move.png", {
             frameWidth: 32,
             frameHeight: 32
         });
-        this.load.spritesheet("player2_walk", "assets/animations/player2_walk.png", {
+        this.load.spritesheet("player2_move", "assets/animations/player2_move.png", {
             frameWidth: 32,
             frameHeight: 32
         });
-        this.load.spritesheet("player3_walk", "assets/animations/player3_walk.png", {
+        this.load.spritesheet("player3_move", "assets/animations/player3_move.png", {
             frameWidth: 32,
             frameHeight: 32
         });
@@ -128,20 +128,20 @@ class InitScene extends Phaser.Scene {
             repeat: -1
         });
         this.anims.create({
-            key: "player1_walk",
-            frames: this.anims.generateFrameNames("player1_walk"),
+            key: "player1_move",
+            frames: this.anims.generateFrameNames("player1_move"),
             frameRate: 12,
             repeat: -1
         });
         this.anims.create({
-            key: "player2_walk",
-            frames: this.anims.generateFrameNames("player2_walk"),
+            key: "player2_move",
+            frames: this.anims.generateFrameNames("player2_move"),
             frameRate: 12,
             repeat: -1
         });
         this.anims.create({
-            key: "player3_walk",
-            frames: this.anims.generateFrameNames("player3_walk"),
+            key: "player3_move",
+            frames: this.anims.generateFrameNames("player3_move"),
             frameRate: 12,
             repeat: -1
         });

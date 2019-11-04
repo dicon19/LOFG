@@ -23,7 +23,7 @@ class CustomizeScene extends Phaser.Scene {
                     this.pos = SKINS.length - 1;
                 }
                 skin = SKINS[this.pos];
-                this.player.anims.play(skin + "_walk", true);
+                this.player.anims.play(skin + "_move", true);
             }).flipX = true;
 
         // =>
@@ -39,7 +39,7 @@ class CustomizeScene extends Phaser.Scene {
                     this.pos = 0;
                 }
                 skin = SKINS[this.pos];
-                this.player.anims.play(skin + "_walk", true);
+                this.player.anims.play(skin + "_move", true);
             });
 
         // 메뉴 씬 이동 버튼
@@ -57,7 +57,7 @@ class CustomizeScene extends Phaser.Scene {
             .sprite(640, 360, skin)
             .setOrigin(0.5, 0.5)
             .setDisplaySize(128, 128)
-            .anims.play(skin + "_walk", true);
+            .anims.play(skin + "_move", true);
         // #endregion
     }
 }

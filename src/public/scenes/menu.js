@@ -27,7 +27,6 @@ class MenuScene extends Phaser.Scene {
         // 이름 입력 창
         this.element = this.add.dom(640, 400).createFromCache("nameform");
         this.element.getChildByName("nameField").value = name;
-
         this.element.addListener("click");
         this.element.on("click", (event) => {
             if (event.target.name == "playButton") {

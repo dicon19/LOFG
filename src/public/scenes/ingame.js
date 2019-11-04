@@ -18,8 +18,14 @@ class IngameScene extends Phaser.Scene {
             this.socket.emit("latency");
         }, 1000);
 
+        // 배경 초기화
+        this.cameras.main.setBackgroundColor("#a3cca3");
+
         // #region UI
-        // 타이머
+        // 게임 제한 시간 타이머
+        this.timerBox = this.add.graphics().setScrollFactor(0);
+        this.timerBox.fillStyle(0x808080, 0.8);
+        this.timerBox.fillRoundedRect(40, 65, 230, 70, 20);
         this.timer = this.add
             .sprite(80, 100, "timer")
             .setScrollFactor(0)
@@ -46,12 +52,11 @@ class IngameScene extends Phaser.Scene {
             .setScrollFactor(0);
 
         // 랭킹
-        this.rank = this.add
-            .text(
-                1080,
-                80,
-                "#1anggimoddi  013\n#2junhaddiiiii    12\n#3anggimoddi  013\n#4junhaddiiiii    12\n#5anggimoddi  013\n#6junhaddiiiii    12"
-            )
+        this.rankingText = this.add
+            .text(1080, 80, "", {
+                fontFamily: "NanumGothic",
+                fontSize: "18px"
+            })
             .setDepth(100)
             .setScrollFactor(0);
         // #endregion
@@ -119,7 +124,7 @@ class IngameScene extends Phaser.Scene {
                                 player.hp = INSTANCE_INFO.hp;
 
                                 if (INSTANCE_INFO.isMove) {
-                                    player.anims.play(INSTANCE_INFO.sprite + "_walk", true);
+                                    player.anims.play(INSTANCE_INFO.sprite + "_move", true);
                                 } else {
                                     player.anims.play(INSTANCE_INFO.sprite + "_idle", true);
                                 }
@@ -149,9 +154,9 @@ class IngameScene extends Phaser.Scene {
             const LATENCY = Date.now() - startTime;
             this.pingText.setText(LATENCY);
 
-            if (LATENCY < 80) {
+            if (LATENCY <= 100) {
                 this.ping.setTint(0x00ff7b);
-            } else if (LATENCY < 100) {
+            } else if (LATENCY <= 150) {
                 this.ping.setTint(0xffff00);
             } else {
                 this.ping.setTint(0xff0000);
@@ -180,7 +185,20 @@ class IngameScene extends Phaser.Scene {
             bullet.y += (bullet.dy - bullet.y) * 0.5;
         });
 
-        // UI
+        // #region UI
+        // 랭킹
+        let ranking = "";
+        let rankings = this.players.getChildren();
+        rankings.sort((a, b) => {
+            return b["score"] - a["score"];
+        });
+
+        for (let i = 0; i < rankings.length; i++) {
+            ranking += "#" + (i + 1) + " " + rankings[i].name + "    " + rankings[i].score + "\n";
+        }
+        this.rankingText.setText(ranking);
+
+        // 플레이어
         this.players.getChildren().forEach((player) => {
             player.text.setText(player.score + " " + player.name);
             player.text.setPosition(player.x, player.y - 42);
@@ -193,6 +211,7 @@ class IngameScene extends Phaser.Scene {
             player.hpBar.fillStyle(0xff0000, 0.8);
             player.hpBar.fillRect(player.x - 24, player.y - 28, (player.hp / player.hpMax) * 48, 12);
         });
+        // #endregion
 
         // 플레이어 이동 | 공격
         const LEFT = this.cursors.left.isDown;
