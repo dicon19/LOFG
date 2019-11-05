@@ -56,7 +56,7 @@ class CustomizeScene extends Phaser.Scene {
         this.player = this.add
             .sprite(640, 360, skin)
             .setOrigin(0.5, 0.5)
-            .setDisplaySize(128, 128)
+            .setScale(3)
             .anims.play(skin + "_move", true);
         // #endregion
     }

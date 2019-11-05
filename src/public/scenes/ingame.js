@@ -25,13 +25,13 @@ class IngameScene extends Phaser.Scene {
         // 게임 제한 시간 타이머
         this.timerBox = this.add.graphics().setScrollFactor(0);
         this.timerBox.fillStyle(0x808080, 0.8);
-        this.timerBox.fillRoundedRect(40, 65, 230, 70, 20);
+        this.timerBox.fillRoundedRect(40, 70, 230, 65, 30);
         this.timer = this.add
             .sprite(80, 100, "timer")
             .setScrollFactor(0)
             .setDisplaySize(48, 48);
         this.timerText = this.add
-            .text(120, 70, "00:00", {
+            .text(120, 75, "00:00", {
                 fontFamily: "NanumGothic",
                 fontSize: "48px"
             })
@@ -193,7 +193,7 @@ class IngameScene extends Phaser.Scene {
             return b["score"] - a["score"];
         });
 
-        for (let i = 0; i < rankings.length; i++) {
+        for (let i = 0; i < Math.min(rankings.length, 5); i++) {
             ranking += "#" + (i + 1) + " " + rankings[i].name + "    " + rankings[i].score + "\n";
         }
         this.rankingText.setText(ranking);

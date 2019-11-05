@@ -28,10 +28,15 @@ function WebGLTexture() {}
 
 function preload() {
     // 리소스 불러오기
-    this.load.image("bullet", "assets/sprites/bullet.png");
+    this.load.image("bullet1", "assets/sprites/bullet1.png");
     this.load.image("player1", "assets/sprites/player1.png");
     this.load.image("player2", "assets/sprites/player2.png");
     this.load.image("player3", "assets/sprites/player3.png");
+    this.load.image("player4", "assets/sprites/player4.png");
+    this.load.image("player5", "assets/sprites/player5.png");
+    this.load.image("player6", "assets/sprites/player6.png");
+    this.load.image("player7", "assets/sprites/player7.png");
+    this.load.image("player8", "assets/sprites/player8.png");
 
     this.load.image("tileset1", "assets/tilesets/four-seasons-tileset.png");
     this.load.image("tileset2", "assets/tilesets/[32x32] Rocky Grass.png");
@@ -53,9 +58,13 @@ function create() {
 
             if (sec > 0) {
                 sec--;
-            } else {
+            } else if (min > 0) {
                 min--;
                 sec = 59;
+            } else {
+                // TODO 타임오버 이벤트 구현
+                min = 10;
+                sec = 0;
             }
 
             if (sec < 10) {
@@ -138,7 +147,7 @@ function create() {
                             instanceType: "bullet",
                             x: player.x,
                             y: player.y,
-                            sprite: "bullet",
+                            sprite: "bullet1",
                             attackAt: player.instanceId,
                             flipX: player.flipX
                         };
@@ -165,7 +174,7 @@ function create() {
     // 맵 불러오기
     this.map = this.make.tilemap({ key: "map2" });
     this.tileset = this.map.addTilesetImage("[32x32] Rocky Grass", "tileset2");
-    this.worldLayer = this.map.createStaticLayer("world", this.tileset, 0, 0);
+    this.worldLayer = this.map.createStaticLayer("world", this.tileset);
     this.worldLayer.setCollisionByProperty({ solid: true });
     this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 
@@ -235,7 +244,7 @@ function createPlayer(self, playerInfo) {
     PLAYER.moveSpeed = 200;
     PLAYER.jumpPower = 400;
     PLAYER.isAttack = true;
-    PLAYER.attackDelayTime = 10;
+    PLAYER.attackDelayTime = 100;
 }
 
 function createBullet(self, bulletInfo) {
@@ -247,7 +256,7 @@ function createBullet(self, bulletInfo) {
     BULLET.instanceId = bulletInfo.instanceId;
     BULLET.attackAt = bulletInfo.attackAt;
     BULLET.flipX = bulletInfo.flipX;
-    BULLET.damage = 10;
+    BULLET.damage = 5;
     BULLET.knockbackPower = 1;
 }
 

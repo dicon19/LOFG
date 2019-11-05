@@ -14,7 +14,7 @@ const CONFIG = {
 };
 
 const GAME = new Phaser.Game(CONFIG);
-const SKINS = ["player1", "player2", "player3"];
+const SKINS = ["player1", "player2", "player3", "player4", "player5", "player6"];
 let name = "";
 let skin = choose(SKINS);
 

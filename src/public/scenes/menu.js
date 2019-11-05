@@ -7,7 +7,7 @@ class MenuScene extends Phaser.Scene {
         this.socket = io();
 
         // 배경 초기화
-        this.cameras.main.setBackgroundColor("#50bcdf");
+        this.add.sprite(0, 0, "background1").setOrigin(0, 0);
 
         // #region UI
         // 로고

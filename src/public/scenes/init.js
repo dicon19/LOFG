@@ -12,28 +12,25 @@ class InitScene extends Phaser.Scene {
         this.load.image("button", "assets/sprites/button.png");
         this.load.image("timer", "assets/sprites/timer.png");
         this.load.image("ping", "assets/sprites/ping.png");
-        this.load.image("bullet", "assets/sprites/bullet.png");
+        this.load.image("bullet1", "assets/sprites/bullet1.png");
+
+        this.load.image("background1", "assets/backgrounds/background1.png");
 
         this.load.image("tileset1", "assets/tilesets/four-seasons-tileset.png");
         this.load.image("tileset2", "assets/tilesets/[32x32] Rocky Grass.png");
         this.load.tilemapTiledJSON("map1", "assets/tilemaps/map1.json");
         this.load.tilemapTiledJSON("map2", "assets/tilemaps/map2.json");
 
-        this.load.image("player1", "assets/sprites/player1.png");
-        this.load.image("player2", "assets/sprites/player2.png");
-        this.load.image("player3", "assets/sprites/player3.png");
-        this.load.spritesheet("player1_move", "assets/animations/player1_move.png", {
-            frameWidth: 32,
-            frameHeight: 32
-        });
-        this.load.spritesheet("player2_move", "assets/animations/player2_move.png", {
-            frameWidth: 32,
-            frameHeight: 32
-        });
-        this.load.spritesheet("player3_move", "assets/animations/player3_move.png", {
-            frameWidth: 32,
-            frameHeight: 32
-        });
+        for (let i = 1; i <= SKINS.length; i++) {
+            this.load.spritesheet("player" + i + "_idle", "assets/animations/player" + i + "_idle.png", {
+                frameWidth: 32,
+                frameHeight: 32
+            });
+            this.load.spritesheet("player" + i + "_move", "assets/animations/player" + i + "_move.png", {
+                frameWidth: 32,
+                frameHeight: 32
+            });
+        }
 
         this.load.html("nameform", "assets/form/nameform.html");
 
@@ -108,44 +105,21 @@ class InitScene extends Phaser.Scene {
     }
 
     create() {
-        // #region 애니메이션 추가
-        this.anims.create({
-            key: "player1_idle",
-            frames: [{ key: "player1" }],
-            frameRate: 12,
-            repeat: -1
-        });
-        this.anims.create({
-            key: "player2_idle",
-            frames: [{ key: "player2" }],
-            frameRate: 12,
-            repeat: -1
-        });
-        this.anims.create({
-            key: "player3_idle",
-            frames: [{ key: "player3" }],
-            frameRate: 12,
-            repeat: -1
-        });
-        this.anims.create({
-            key: "player1_move",
-            frames: this.anims.generateFrameNames("player1_move"),
-            frameRate: 12,
-            repeat: -1
-        });
-        this.anims.create({
-            key: "player2_move",
-            frames: this.anims.generateFrameNames("player2_move"),
-            frameRate: 12,
-            repeat: -1
-        });
-        this.anims.create({
-            key: "player3_move",
-            frames: this.anims.generateFrameNames("player3_move"),
-            frameRate: 12,
-            repeat: -1
-        });
-        // #endregion
+        // 애니메이션 추가
+        for (let i = 1; i <= SKINS.length; i++) {
+            this.anims.create({
+                key: "player" + i + "_idle",
+                frames: this.anims.generateFrameNames("player" + i + "_idle"),
+                frameRate: 12,
+                repeat: -1
+            });
+            this.anims.create({
+                key: "player" + i + "_move",
+                frames: this.anims.generateFrameNames("player" + i + "_move"),
+                frameRate: 12,
+                repeat: -1
+            });
+        }
 
         // 메뉴 씬 이동
         this.scene.start("menuScene");
