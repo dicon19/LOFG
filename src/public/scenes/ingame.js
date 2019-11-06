@@ -28,6 +28,7 @@ class IngameScene extends Phaser.Scene {
         this.timerBox.fillRoundedRect(40, 70, 230, 65, 30);
         this.timer = this.add
             .sprite(80, 100, "timer")
+            .setDepth(100)
             .setScrollFactor(0)
             .setDisplaySize(48, 48);
         this.timerText = this.add
@@ -41,6 +42,7 @@ class IngameScene extends Phaser.Scene {
         // 핑
         this.ping = this.add
             .sprite(360, 100, "ping")
+            .setDepth(100)
             .setScrollFactor(0)
             .setDisplaySize(32, 32);
         this.pingText = this.add
