@@ -28,7 +28,6 @@ function WebGLTexture() {}
 
 function preload() {
     // 리소스 불러오기
-    this.load.image("bullet1", "assets/sprites/bullet1.png");
     this.load.image("player1", "assets/sprites/player1.png");
     this.load.image("player2", "assets/sprites/player2.png");
     this.load.image("player3", "assets/sprites/player3.png");
@@ -37,6 +36,7 @@ function preload() {
     this.load.image("player6", "assets/sprites/player6.png");
     this.load.image("player7", "assets/sprites/player7.png");
     this.load.image("player8", "assets/sprites/player8.png");
+    this.load.image("bullet1", "assets/sprites/bullet1.png");
 
     this.load.image("tileset1", "assets/tilesets/four-seasons-tileset.png");
     this.load.image("tileset2", "assets/tilesets/[32x32] Rocky Grass.png");

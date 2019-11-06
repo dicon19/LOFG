@@ -5,6 +5,8 @@ class InitScene extends Phaser.Scene {
 
     preload() {
         // #region 리소스 불러오기
+        this.load.image("background1", "assets/backgrounds/background1.png");
+
         this.load.image("logo", "assets/sprites/logo.png");
         this.load.image("customize", "assets/sprites/customize.png");
         this.load.image("facebook", "assets/sprites/facebook.png");
@@ -12,14 +14,8 @@ class InitScene extends Phaser.Scene {
         this.load.image("button", "assets/sprites/button.png");
         this.load.image("timer", "assets/sprites/timer.png");
         this.load.image("ping", "assets/sprites/ping.png");
-        this.load.image("bullet1", "assets/sprites/bullet1.png");
 
-        this.load.image("background1", "assets/backgrounds/background1.png");
-
-        this.load.image("tileset1", "assets/tilesets/four-seasons-tileset.png");
-        this.load.image("tileset2", "assets/tilesets/[32x32] Rocky Grass.png");
-        this.load.tilemapTiledJSON("map1", "assets/tilemaps/map1.json");
-        this.load.tilemapTiledJSON("map2", "assets/tilemaps/map2.json");
+        this.load.html("nameform", "assets/form/nameform.html");
 
         for (let i = 1; i <= SKINS.length; i++) {
             this.load.spritesheet("player" + i + "_idle", "assets/animations/player" + i + "_idle.png", {
@@ -31,8 +27,13 @@ class InitScene extends Phaser.Scene {
                 frameHeight: 32
             });
         }
+        this.load.image("weapon1", "assets/sprites/weapon1.png");
+        this.load.image("bullet1", "assets/sprites/bullet1.png");
 
-        this.load.html("nameform", "assets/form/nameform.html");
+        this.load.image("tileset1", "assets/tilesets/four-seasons-tileset.png");
+        this.load.image("tileset2", "assets/tilesets/[32x32] Rocky Grass.png");
+        this.load.tilemapTiledJSON("map1", "assets/tilemaps/map1.json");
+        this.load.tilemapTiledJSON("map2", "assets/tilemaps/map2.json");
 
         this.load.audio("bgm1", "assets/sounds/bgm/bgm1.mp3");
         this.load.audio("hurt", "assets/sounds/sfx/hurt.mp3");
@@ -110,7 +111,7 @@ class InitScene extends Phaser.Scene {
             this.anims.create({
                 key: "player" + i + "_idle",
                 frames: this.anims.generateFrameNames("player" + i + "_idle"),
-                frameRate: 12,
+                frameRate: 6,
                 repeat: -1
             });
             this.anims.create({
@@ -120,6 +121,18 @@ class InitScene extends Phaser.Scene {
                 repeat: -1
             });
         }
+
+        // 배경음악 재생
+        bgm = this.sound.add("bgm1", {
+            mute: false,
+            volume: 0.5,
+            rate: 1,
+            detune: 0,
+            seek: 0,
+            loop: true,
+            delay: 0
+        });
+        bgm.play();
 
         // 메뉴 씬 이동
         this.scene.start("menuScene");
