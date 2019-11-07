@@ -4,9 +4,7 @@ class IngameScene extends Phaser.Scene {
     }
 
     create() {
-        this.socket = io({
-            transports: ["websocket"]
-        });
+        this.socket = io();
         this.socket.emit("ingame", name, skin);
 
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -187,8 +185,8 @@ class IngameScene extends Phaser.Scene {
         // #endregion
 
         // 맵 불러오기
-        this.map = this.make.tilemap({ key: "map2" });
-        this.tileset = this.map.addTilesetImage("[32x32] Rocky Grass", "tileset2");
+        this.map = this.make.tilemap({ key: "map1" });
+        this.tileset = this.map.addTilesetImage("tileset1");
         this.worldLayer = this.map.createStaticLayer("world", this.tileset, 0, 0);
         this.worldLayer.setDepth(-100);
 

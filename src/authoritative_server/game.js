@@ -38,10 +38,8 @@ function preload() {
     this.load.image("player8", "assets/sprites/player8.png");
     this.load.image("bullet1", "assets/sprites/bullet1.png");
 
-    this.load.image("tileset1", "assets/tilesets/four-seasons-tileset.png");
-    this.load.image("tileset2", "assets/tilesets/[32x32] Rocky Grass.png");
+    this.load.image("tileset1", "assets/tilesets/tileset1.png");
     this.load.tilemapTiledJSON("map1", "assets/tilemaps/map1.json");
-    this.load.tilemapTiledJSON("map2", "assets/tilemaps/map2.json");
 }
 
 function create() {
@@ -91,7 +89,7 @@ function create() {
             INSTANCES[socket.id] = {
                 instanceId: socket.id,
                 instanceType: "player",
-                x: Math.floor(Math.random() * 1280),
+                x: 100 + Math.floor(Math.random() * this.map.widthInPixels - 100),
                 y: 100,
                 name: name,
                 sprite: skin,
@@ -172,8 +170,8 @@ function create() {
     });
 
     // 맵 불러오기
-    this.map = this.make.tilemap({ key: "map2" });
-    this.tileset = this.map.addTilesetImage("[32x32] Rocky Grass", "tileset2");
+    this.map = this.make.tilemap({ key: "map1" });
+    this.tileset = this.map.addTilesetImage("tileset1");
     this.worldLayer = this.map.createStaticLayer("world", this.tileset);
     this.worldLayer.setCollisionByProperty({ solid: true });
     this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
@@ -280,7 +278,7 @@ function playerDead(self, player) {
         // 자살 페널티
         player.score--;
     }
-    player.body.reset(Math.floor(Math.random() * 1280), 100);
+    player.body.reset(100 + Math.floor(Math.random() * self.map.widthInPixels - 100), 100);
     player.hp = player.hpMax;
 }
 

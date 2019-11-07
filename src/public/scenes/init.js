@@ -30,10 +30,8 @@ class InitScene extends Phaser.Scene {
         this.load.image("weapon1", "assets/sprites/weapon1.png");
         this.load.image("bullet1", "assets/sprites/bullet1.png");
 
-        this.load.image("tileset1", "assets/tilesets/four-seasons-tileset.png");
-        this.load.image("tileset2", "assets/tilesets/[32x32] Rocky Grass.png");
+        this.load.image("tileset1", "assets/tilesets/tileset1.png");
         this.load.tilemapTiledJSON("map1", "assets/tilemaps/map1.json");
-        this.load.tilemapTiledJSON("map2", "assets/tilemaps/map2.json");
 
         this.load.audio("bgm1", "assets/sounds/bgm/bgm1.mp3");
         this.load.audio("hurt", "assets/sounds/sfx/hurt.mp3");
