@@ -4,7 +4,9 @@ class IngameScene extends Phaser.Scene {
     }
 
     create() {
-        this.socket = io();
+        this.socket = io({
+            transports: ["websocket"]
+        });
         this.socket.emit("ingame", name, skin);
 
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -23,7 +25,10 @@ class IngameScene extends Phaser.Scene {
 
         // #region UI
         // 게임 제한 시간 타이머
-        this.timerBox = this.add.graphics().setScrollFactor(0);
+        this.timerBox = this.add
+            .graphics()
+            .setDepth(100)
+            .setScrollFactor(0);
         this.timerBox.fillStyle(0x808080, 0.8);
         this.timerBox.fillRoundedRect(40, 70, 230, 65, 30);
         this.timer = this.add
@@ -54,10 +59,25 @@ class IngameScene extends Phaser.Scene {
             .setScrollFactor(0);
 
         // 랭킹
-        this.rankingText = this.add
-            .text(1080, 80, "", {
+        this.leaderboardText = this.add
+            .text(1110, 70, "Leaderboard", {
                 fontFamily: "NanumGothic",
                 fontSize: "18px"
+            })
+            .setDepth(100)
+            .setScrollFactor(0);
+        this.rankingText = this.add
+            .text(1080, 100, "", {
+                fontFamily: "NanumGothic",
+                fontSize: "12px"
+            })
+            .setDepth(100)
+            .setScrollFactor(0);
+        this.rankingScoreText = this.add
+            .text(1240, 100, "", {
+                fontFamily: "NanumGothic",
+                fontSize: "12px",
+                rtl: true
             })
             .setDepth(100)
             .setScrollFactor(0);
@@ -190,19 +210,22 @@ class IngameScene extends Phaser.Scene {
         // #region UI
         // 랭킹
         let ranking = "";
+        let rankingScore = "";
         let rankings = this.players.getChildren();
         rankings.sort((a, b) => {
             return b["score"] - a["score"];
         });
 
-        for (let i = 0; i < Math.min(rankings.length, 5); i++) {
-            ranking += "#" + (i + 1) + " " + rankings[i].name + "    " + rankings[i].score + "\n";
+        for (let i = 0; i < Math.min(rankings.length, 10); i++) {
+            ranking += "#" + (i + 1) + "  " + rankings[i].name + "\n";
+            rankingScore += rankings[i].score + "\n";
         }
         this.rankingText.setText(ranking);
+        this.rankingScoreText.setText(rankingScore);
 
         // 플레이어
         this.players.getChildren().forEach((player) => {
-            player.text.setText(player.score + " " + player.name);
+            player.text.setText("[" + player.score + "] " + player.name);
             player.text.setPosition(player.x, player.y - 42);
 
             player.hpBox.clear();
@@ -210,7 +233,7 @@ class IngameScene extends Phaser.Scene {
             player.hpBox.fillRect(player.x - 24, player.y - 28, 48, 12);
 
             player.hpBar.clear();
-            player.hpBar.fillStyle(0xff0000, 0.8);
+            player.hpBar.fillStyle(player.instanceId == this.socket.id ? 0x00ff00 : 0xff0000, 0.8);
             player.hpBar.fillRect(player.x - 24, player.y - 28, (player.hp / player.hpMax) * 48, 12);
         });
         // #endregion
@@ -245,7 +268,7 @@ class IngameScene extends Phaser.Scene {
 
         // 플레이어 UI
         PLAYER.text = this.add
-            .text(playerInfo.x, playerInfo.y - 42, playerInfo.score + " " + playerInfo.name, {
+            .text(playerInfo.x, playerInfo.y - 42, "[" + playerInfo.score + "] " + playerInfo.name, {
                 fontFamily: "NanumGothic",
                 fontSize: "14px"
             })
@@ -255,7 +278,7 @@ class IngameScene extends Phaser.Scene {
 
         // 플레이어 시점 카메라 고정
         if (isMyPlayer) {
-            this.cameras.main.startFollow(PLAYER, true, 0.05, 0.05);
+            this.cameras.main.startFollow(PLAYER, true, 0.1, 0.1);
         }
     }
 

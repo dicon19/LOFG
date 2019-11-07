@@ -16,7 +16,7 @@ const CONFIG = {
         default: "arcade",
         arcade: {
             gravity: {
-                y: 500
+                y: 700
             }
         }
     }
@@ -180,7 +180,7 @@ function create() {
 
     // 충돌 설정
     this.physics.add.collider(this.players, this.worldLayer);
-    this.physics.add.collider(this.players, this.bullets, (player, bullet) => {
+    this.physics.add.overlap(this.players, this.bullets, (player, bullet) => {
         if (player.instanceId != bullet.attackAt) {
             if (player.hp > bullet.damage) {
                 player.hp -= bullet.damage;
@@ -233,7 +233,8 @@ function createPlayer(self, playerInfo) {
     const PLAYER = self.physics.add.sprite(playerInfo.x, playerInfo.y, playerInfo.sprite);
     self.players.add(PLAYER);
     PLAYER.body.setBounce(0, 0);
-    PLAYER.body.setDragX(0.95);
+    PLAYER.body.setDragX(0.9);
+    PLAYER.body.setMaxSpeed(600);
     PLAYER.body.useDamping = true;
 
     PLAYER.instanceId = playerInfo.instanceId;
@@ -244,19 +245,20 @@ function createPlayer(self, playerInfo) {
     PLAYER.moveSpeed = 200;
     PLAYER.jumpPower = 400;
     PLAYER.isAttack = true;
-    PLAYER.attackDelayTime = 100;
+    PLAYER.attackDelayTime = 150;
 }
 
 function createBullet(self, bulletInfo) {
     const BULLET = self.physics.add.sprite(bulletInfo.x, bulletInfo.y, bulletInfo.sprite);
     self.bullets.add(BULLET);
-    BULLET.body.setVelocityX(!bulletInfo.flipX ? 500 : -500);
+    BULLET.body.setVelocityX(!bulletInfo.flipX ? 600 : -600);
+    BULLET.body.setMaxSpeed(600);
     BULLET.body.allowGravity = false;
 
     BULLET.instanceId = bulletInfo.instanceId;
     BULLET.attackAt = bulletInfo.attackAt;
     BULLET.flipX = bulletInfo.flipX;
-    BULLET.damage = 5;
+    BULLET.damage = 10;
     BULLET.knockbackPower = 1;
 }
 

@@ -4,7 +4,9 @@ class MenuScene extends Phaser.Scene {
     }
 
     create() {
-        this.socket = io();
+        this.socket = io({
+            transports: ["websocket"]
+        });
 
         // 배경 초기화
         this.add.sprite(0, 0, "background1").setOrigin(0, 0);

@@ -1,5 +1,5 @@
 {
-    "name": "wpnchall",
+    "name": "lofg",
     "version": "1.0.0",
     "description": "",
     "main": "src/index.js",
@@ -8,14 +8,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/dicon19/wpnchall.git"
+        "url": "git+https://github.com/dicon19/LOFG.git"
     },
     "author": "",
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/dicon19/wpnchall/issues"
+        "url": "https://github.com/dicon19/LOFG/issues"
     },
-    "homepage": "https://github.com/dicon19/wpnchall#readme",
+    "homepage": "https://github.com/dicon19/LOFG#readme",
     "dependencies": {
         "canvas": "^2.6.0",
         "datauri": "^2.0.0",
