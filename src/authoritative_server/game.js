@@ -47,7 +47,7 @@ function create() {
     this.bullets = this.physics.add.group();
 
     // 게임 제한시간 타이머
-    this.timer = "10:00";
+    this.timer = "05:00";
     this.timerAlarm = this.time.addEvent({
         delay: 1000,
         callback: () => {
@@ -61,7 +61,7 @@ function create() {
                 sec = 59;
             } else {
                 // TODO 타임오버 이벤트 구현
-                min = 10;
+                min = 5;
                 sec = 0;
             }
 
@@ -180,15 +180,16 @@ function create() {
     this.physics.add.collider(this.players, this.worldLayer);
     this.physics.add.overlap(this.players, this.bullets, (player, bullet) => {
         if (player.instanceId != bullet.attackAt) {
+            player.body.setVelocityX(bullet.knockbackPower * !bullet.flipX ? 500 : -500);
+            player.body.setVelocityY(-200);
+            player.deadAt = bullet.attackAt;
+            destroyBullet(bullet);
+
             if (player.hp > bullet.damage) {
                 player.hp -= bullet.damage;
             } else {
-                player.deadAt = bullet.attackAt;
                 playerDead(this, player);
             }
-            player.body.setVelocityX(bullet.knockbackPower * !bullet.flipX ? 500 : -500);
-            player.body.setVelocityY(-200);
-            destroyBullet(bullet);
         }
     });
     this.physics.add.collider(this.bullets, this.worldLayer, (bullet) => {
