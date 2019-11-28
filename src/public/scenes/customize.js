@@ -14,9 +14,16 @@ class CustomizeScene extends Phaser.Scene {
         this.leftArrow = this.add
             .sprite(320, 360, "arrow")
             .setOrigin(0.5, 0.5)
-            .setDisplaySize(120, 120)
             .setInteractive()
-            .on("pointerdown", () => {
+            .on("pointerover", () => {
+                this.leftArrow.setTint(0xcccccc);
+                this.leftArrow.dscale = 1.2;
+            })
+            .on("pointerout", () => {
+                this.leftArrow.setTint(0xffffff);
+                this.leftArrow.dscale = 1;
+            })
+            .on("pointerup", () => {
                 if (this.pos > 0) {
                     this.pos--;
                 } else {
@@ -24,15 +31,24 @@ class CustomizeScene extends Phaser.Scene {
                 }
                 skin = SKINS[this.pos];
                 this.player.anims.play(skin + "_move", true);
-            }).flipX = true;
+            });
+        this.leftArrow.flipX = true;
+        this.leftArrow.dscale = 1;
 
         // =>
         this.rightArrow = this.add
             .sprite(960, 360, "arrow")
             .setOrigin(0.5, 0.5)
-            .setDisplaySize(120, 120)
             .setInteractive()
-            .on("pointerdown", () => {
+            .on("pointerover", () => {
+                this.rightArrow.setTint(0xcccccc);
+                this.rightArrow.dscale = 1.2;
+            })
+            .on("pointerout", () => {
+                this.rightArrow.setTint(0xffffff);
+                this.rightArrow.dscale = 1;
+            })
+            .on("pointerup", () => {
                 if (this.pos < SKINS.length - 1) {
                     this.pos++;
                 } else {
@@ -41,16 +57,25 @@ class CustomizeScene extends Phaser.Scene {
                 skin = SKINS[this.pos];
                 this.player.anims.play(skin + "_move", true);
             });
+        this.rightArrow.dscale = 1;
 
         // 메뉴 씬 이동 버튼
         this.selectButton = this.add
             .sprite(640, 520, "button")
             .setOrigin(0.5, 0.5)
-            .setDisplaySize(120, 120)
             .setInteractive()
-            .on("pointerdown", () => {
+            .on("pointerover", () => {
+                this.selectButton.setTint(0xcccccc);
+                this.selectButton.dscale = 1.2;
+            })
+            .on("pointerout", () => {
+                this.selectButton.setTint(0xffffff);
+                this.selectButton.dscale = 1;
+            })
+            .on("pointerup", () => {
                 this.scene.start("menuScene");
             });
+        this.selectButton.dscale = 1;
 
         // 캐릭터
         this.player = this.add
@@ -59,5 +84,11 @@ class CustomizeScene extends Phaser.Scene {
             .setScale(3)
             .anims.play(skin + "_move", true);
         // #endregion
+    }
+
+    update() {
+        this.leftArrow.scale += (this.leftArrow.dscale - this.leftArrow.scale) / 10;
+        this.rightArrow.scale += (this.rightArrow.dscale - this.rightArrow.scale) / 10;
+        this.selectButton.scale += (this.selectButton.dscale - this.selectButton.scale) / 10;
     }
 }

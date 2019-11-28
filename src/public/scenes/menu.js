@@ -42,24 +42,33 @@ class MenuScene extends Phaser.Scene {
         this.customize = this.add
             .sprite(120, 600, "customize")
             .setOrigin(0.5, 0.5)
-            .setDisplaySize(120, 120)
             .setInteractive()
-            .on("pointerdown", () => {
+            .on("pointerover", () => {
+                this.customize.setTint(0xcccccc);
+                this.customize.dscale = 1.2;
+            })
+            .on("pointerout", () => {
+                this.customize.setTint(0xffffff);
+                this.customize.dscale = 1;
+            })
+            .on("pointerup", () => {
                 name = this.element.getChildByName("nameField").value;
                 this.socket.disconnect();
                 this.scene.start("customizeScene");
             });
+        this.customize.dscale = 1;
 
         // 페이스북
-        this.facebook = this.add
-            .sprite(1160, 600, "facebook")
-            .setOrigin(0.5, 0.5)
-            .setDisplaySize(120, 120);
+        this.facebook = this.add.sprite(1160, 600, "facebook").setOrigin(0.5, 0.5);
         // #endregion
 
         // 접속중인 플레이어 수 받기
         this.socket.on("getPlayers", (players) => {
             this.onlinePlayerText.setText(players + " 접속중");
         });
+    }
+
+    update() {
+        this.customize.scale += (this.customize.dscale - this.customize.scale) / 10;
     }
 }

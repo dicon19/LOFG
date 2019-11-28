@@ -32,8 +32,7 @@ class IngameScene extends Phaser.Scene {
         this.timer = this.add
             .sprite(80, 100, "timer")
             .setDepth(100)
-            .setScrollFactor(0)
-            .setDisplaySize(48, 48);
+            .setScrollFactor(0);
         this.timerText = this.add
             .text(120, 75, "00:00", {
                 fontFamily: "NanumGothic",
@@ -46,8 +45,7 @@ class IngameScene extends Phaser.Scene {
         this.ping = this.add
             .sprite(360, 100, "ping")
             .setDepth(100)
-            .setScrollFactor(0)
-            .setDisplaySize(32, 32);
+            .setScrollFactor(0);
         this.pingText = this.add
             .text(390, 85, "0", {
                 fontFamily: "NanumGothic",
