@@ -42,8 +42,6 @@ class IngameScene extends Phaser.Scene {
             .setDepth(100)
             .setScrollFactor(0);
 
-        this.add.sprite(50, 50, "enemyArrow").setScrollFactor(0);
-
         // 핑
         this.ping = this.add
             .sprite(360, 100, "ping")
@@ -90,7 +88,7 @@ class IngameScene extends Phaser.Scene {
 
                 switch (INSTANCE_INFO.instanceType) {
                     case "player":
-                        this.createPlayer(INSTANCE_INFO, INSTANCE_INFO.instanceId == this.socket.id);
+                        this.createPlayer(INSTANCE_INFO);
                         break;
                     case "bullet":
                         this.createBullet(INSTANCE_INFO);
@@ -109,11 +107,16 @@ class IngameScene extends Phaser.Scene {
                     player.destroy();
                 }
             });
+            this.enemyArrows.getChildren().forEach((arrow) => {
+                if (playerId == arrow.instanceId) {
+                    arrow.destroy();
+                }
+            });
         });
 
         // 새로운 플레이어 접속
         this.socket.on("addPlayer", (playerInfo) => {
-            this.createPlayer(playerInfo, false);
+            this.createPlayer(playerInfo);
         });
 
         // 플레이어 총알 발사
@@ -232,7 +235,7 @@ class IngameScene extends Phaser.Scene {
             player.hpBox.fillRect(player.x - 24, player.y - 28, 48, 12);
 
             player.hpBar.clear();
-            player.hpBar.fillStyle(player.instanceId == this.socket.id ? 0x00ff00 : 0xff0000, 0.8);
+            player.hpBar.fillStyle(player.instanceId == this.myPlayer.id ? 0x00ff00 : 0xff0000, 0.8);
             player.hpBar.fillRect(player.x - 24, player.y - 28, (player.hp / player.hpMax) * 48, 12);
         });
         // #endregion
@@ -252,32 +255,20 @@ class IngameScene extends Phaser.Scene {
             });
         }
 
-        let myPlayer;
-        this.players.getChildren().forEach((player) => {
-            if (player.instanceId == this.socket.id) {
-                myPlayer = player;
-            }
-        });
-
+        // 다른 플레이어 방향 화살표
         this.players.getChildren().forEach((player) => {
             this.enemyArrows.getChildren().forEach((arrow) => {
-                let dir = Phaser.Math.Angle.Between(myPlayer.x, myPlayer.y, player.x, player.y);
-
-                console.log(Phaser.Math.RadToDeg(dir));
-
-                if (this.socket.id == player.instanceId) {
-                    arrow.x = myPlayer.x + Math.cos(Phaser.Math.RadToDeg(dir)) * 60;
-                    arrow.y = myPlayer.y + Math.sin(Phaser.Math.RadToDeg(dir)) * 60;
-                }
-                if (arrow.instanceId == player.instanceId) {
-                    //각도 처리
-                    arrow.setAngle(Phaser.Math.RadToDeg(dir));
+                if (player.instanceId == arrow.instanceId) {
+                    const DIR = Phaser.Math.Angle.Between(this.myPlayer.x, this.myPlayer.y, player.x, player.y);
+                    arrow.setAngle(Phaser.Math.RadToDeg(DIR));
+                    arrow.x = this.myPlayer.x + Math.cos(DIR) * 60;
+                    arrow.y = this.myPlayer.y + Math.sin(DIR) * 60;
                 }
             });
         });
     }
 
-    createPlayer(playerInfo, isMyPlayer) {
+    createPlayer(playerInfo) {
         const PLAYER = this.add.sprite(playerInfo.x, playerInfo.y, playerInfo.sprite).setOrigin(0.5, 0.5);
         this.players.add(PLAYER);
 
@@ -299,11 +290,11 @@ class IngameScene extends Phaser.Scene {
         PLAYER.hpBox = this.add.graphics();
         PLAYER.hpBar = this.add.graphics();
 
-        // 플레이어 시점 카메라 고정
-        if (isMyPlayer) {
+        if (this.socket.id == playerInfo.instanceId) {
+            this.myPlayer = PLAYER;
             this.cameras.main.startFollow(PLAYER, true, 0.1, 0.1);
         } else {
-            const ENEMY_ARROW = this.add.sprite(50, 50, "enemyArrow");
+            const ENEMY_ARROW = this.add.sprite(playerInfo.x, playerInfo.y, "enemyArrow");
             this.enemyArrows.add(ENEMY_ARROW);
             ENEMY_ARROW.instanceId = playerInfo.instanceId;
         }
