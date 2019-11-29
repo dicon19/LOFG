@@ -14,7 +14,7 @@ class InitScene extends Phaser.Scene {
         this.load.image("button", "assets/sprites/button.png");
         this.load.image("timer", "assets/sprites/timer.png");
         this.load.image("ping", "assets/sprites/ping.png");
-
+        this.load.image("enemyArrow", "assets/sprites/enemyArrow.png");
         this.load.html("nameform", "assets/form/nameform.html");
 
         for (let i = 1; i <= SKINS.length; i++) {
