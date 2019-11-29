@@ -10,6 +10,7 @@ class IngameScene extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
         this.players = this.add.group();
         this.bullets = this.add.group();
+        this.enemyArrows = this.add.group();
 
         // 핑 보내기
         let startTime;
@@ -41,6 +42,8 @@ class IngameScene extends Phaser.Scene {
             })
             .setDepth(100)
             .setScrollFactor(0);
+
+        this.add.sprite(50, 50, "enemyArrow").setScrollFactor(0);
 
         // 핑
         this.ping = this.add
@@ -250,6 +253,30 @@ class IngameScene extends Phaser.Scene {
                 attack: ATTACK
             });
         }
+
+        let myPlayer;
+        this.players.getChildren().forEach((player) => {
+            if (player.instanceId == this.socket.id) {
+                myPlayer = player;
+            }
+        });
+
+        this.players.getChildren().forEach((player) => {
+            this.enemyArrows.getChildren().forEach((arrow) => {
+                let dir = Phaser.Math.Angle.Between(myPlayer.x, myPlayer.y, player.x, player.y);
+
+                console.log(Phaser.Math.RadToDeg(dir));
+
+                if (this.socket.id == player.instanceId) {
+                    arrow.x = myPlayer.x + Math.cos(Phaser.Math.RadToDeg(dir)) * 60;
+                    arrow.y = myPlayer.y + Math.sin(Phaser.Math.RadToDeg(dir)) * 60;
+                }
+                if (arrow.instanceId == player.instanceId) {
+                    //각도 처리
+                    arrow.setAngle(Phaser.Math.RadToDeg(dir));
+                }
+            });
+        });
     }
 
     createPlayer(playerInfo, isMyPlayer) {
@@ -277,6 +304,10 @@ class IngameScene extends Phaser.Scene {
         // 플레이어 시점 카메라 고정
         if (isMyPlayer) {
             this.cameras.main.startFollow(PLAYER, true, 0.1, 0.1);
+        } else {
+            const ENEMY_ARROW = this.add.sprite(50, 50, "enemyArrow");
+            this.enemyArrows.add(ENEMY_ARROW);
+            ENEMY_ARROW.instanceId = playerInfo.instanceId;
         }
     }
 
