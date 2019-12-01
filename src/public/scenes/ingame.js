@@ -11,8 +11,7 @@ class IngameScene extends Phaser.Scene {
         this.players = this.add.group();
         this.bullets = this.add.group();
         this.enemyArrows = this.add.group();
-        this.latency = 0;
-        this.startTime = Date.now();
+        this.interpolation = 0;
 
         // TODO 체팅창 구현
         // this.chat = this.add.dom(130, 640).createFromCache("chatform");
@@ -35,6 +34,13 @@ class IngameScene extends Phaser.Scene {
                 this.isMenu = false;
             }
         });
+
+        // 핑 보내기
+        this.latency = 0;
+        setInterval(() => {
+            this.latencyTime = Date.now();
+            this.socket.emit("latency");
+        }, 1000);
 
         // 배경 초기화
         this.cameras.main.setBackgroundColor("#a3cca3");
@@ -151,7 +157,7 @@ class IngameScene extends Phaser.Scene {
         });
 
         // 모든 인스턴스 업데이트
-        this.socket.on("instanceUpdates", (instances) => {
+        this.socket.on("instanceUpdates", (instances, date) => {
             Object.keys(instances).forEach((id) => {
                 const INSTANCE_INFO = instances[id];
 
@@ -184,8 +190,19 @@ class IngameScene extends Phaser.Scene {
                 }
             });
 
-            // 핑 받기
-            this.latency = Date.now() - this.startTime;
+            // 보간 값 받기
+            this.interpolation = Date.now() - date;
+            console.log(this.interpolation);
+        });
+
+        // 타이머 시간 받기
+        this.socket.on("getTimer", (timer) => {
+            this.timerText.setText(timer);
+        });
+
+        // 핑 받기
+        this.socket.on("latency", () => {
+            this.latency = Date.now() - this.latencyTime;
             this.pingText.setText(this.latency);
 
             if (this.latency <= 100) {
@@ -195,13 +212,6 @@ class IngameScene extends Phaser.Scene {
             } else {
                 this.ping.setTint(0xff0000);
             }
-            this.startTime = Date.now();
-            console.log(this.latency);
-        });
-
-        // 타이머 시간 받기
-        this.socket.on("getTimer", (timer) => {
-            this.timerText.setText(timer);
         });
         // #endregion
 
@@ -223,7 +233,7 @@ class IngameScene extends Phaser.Scene {
                 x: { value: player.dx },
                 y: { value: player.dy },
                 ease: "Linear",
-                duration: this.latency
+                duration: this.interpolation
             });
         });
         this.bullets.getChildren().forEach((bullet) => {
@@ -232,7 +242,7 @@ class IngameScene extends Phaser.Scene {
                 x: { value: bullet.dx },
                 y: { value: bullet.dy },
                 ease: "Linear",
-                duration: this.latency
+                duration: this.interpolation
             });
         });
 

@@ -164,6 +164,11 @@ function create() {
                 }
             });
         });
+
+        // 핑 보내기
+        socket.on("latency", () => {
+            socket.emit("latency");
+        });
     });
 
     // 맵 불러오기
@@ -222,7 +227,7 @@ function update() {
     });
 
     // 모든 인스턴스 정보 보내기
-    io.emit("instanceUpdates", INSTANCES);
+    io.emit("instanceUpdates", INSTANCES, Date.now());
 }
 
 function createPlayer(self, playerInfo) {
