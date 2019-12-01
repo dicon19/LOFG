@@ -164,11 +164,6 @@ function create() {
                 }
             });
         });
-
-        // 핑 보내기
-        socket.on("latency", () => {
-            socket.emit("latency");
-        });
     });
 
     // 맵 불러오기

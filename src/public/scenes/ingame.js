@@ -11,6 +11,8 @@ class IngameScene extends Phaser.Scene {
         this.players = this.add.group();
         this.bullets = this.add.group();
         this.enemyArrows = this.add.group();
+        this.latency = 0;
+        this.startTime = Date.now();
 
         // TODO 체팅창 구현
         // this.chat = this.add.dom(130, 640).createFromCache("chatform");
@@ -33,13 +35,6 @@ class IngameScene extends Phaser.Scene {
                 this.isMenu = false;
             }
         });
-
-        // 핑 보내기
-        this.latency = 0;
-        setInterval(() => {
-            this.startTime = Date.now();
-            this.socket.emit("latency");
-        }, 1000);
 
         // 배경 초기화
         this.cameras.main.setBackgroundColor("#a3cca3");
@@ -188,15 +183,8 @@ class IngameScene extends Phaser.Scene {
                         break;
                 }
             });
-        });
 
-        // 타이머 시간 받기
-        this.socket.on("getTimer", (timer) => {
-            this.timerText.setText(timer);
-        });
-
-        // 핑 받기
-        this.socket.on("latency", () => {
+            // 핑 받기
             this.latency = Date.now() - this.startTime;
             this.pingText.setText(this.latency);
 
@@ -207,6 +195,13 @@ class IngameScene extends Phaser.Scene {
             } else {
                 this.ping.setTint(0xff0000);
             }
+            this.startTime = Date.now();
+            console.log(this.latency);
+        });
+
+        // 타이머 시간 받기
+        this.socket.on("getTimer", (timer) => {
+            this.timerText.setText(timer);
         });
         // #endregion
 
