@@ -10,6 +10,13 @@ class CustomizeScene extends Phaser.Scene {
         this.cameras.main.setBackgroundColor("#81c147");
 
         // #region UI
+        this.helpText = this.add
+            .text(640, 180, "캐릭터 선택", {
+                fontFamily: "NanumGothic",
+                fontSize: "64px"
+            })
+            .setOrigin(0.5, 0.5);
+
         // <=
         this.leftArrow = this.add
             .sprite(320, 360, "arrow")

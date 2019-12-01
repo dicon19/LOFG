@@ -124,12 +124,14 @@ function create() {
             this.players.getChildren().forEach((player) => {
                 if (socket.id == player.instanceId) {
                     // 이동
-                    if (inputData.left) {
-                        player.body.setVelocityX(-player.moveSpeed);
-                        player.flipX = true;
-                    } else if (inputData.right) {
-                        player.body.setVelocityX(player.moveSpeed);
-                        player.flipX = false;
+                    if (inputData.left != inputData.right) {
+                        if (inputData.left) {
+                            player.body.setVelocityX(-player.moveSpeed);
+                            player.flipX = true;
+                        } else if (inputData.right) {
+                            player.body.setVelocityX(player.moveSpeed);
+                            player.flipX = false;
+                        }
                     }
 
                     // 점프

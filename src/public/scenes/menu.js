@@ -7,15 +7,15 @@ class MenuScene extends Phaser.Scene {
         this.socket = io();
 
         // 배경 초기화
-        this.add.sprite(0, 0, "background1").setOrigin(0, 0);
+        this.background = this.add.sprite(0, 0, "background1").setOrigin(0, 0);
 
         // #region UI
         // 로고
-        this.add.sprite(640, 240, "logo").setOrigin(0.5, 0.5);
+        this.logo = this.add.sprite(640, 240, "logo").setOrigin(0.5, 0.5);
 
         // 접속중인 플레이어 수
         this.onlinePlayerText = this.add
-            .text(640, 400, "0 접속중", {
+            .text(640, 400, "연결중...", {
                 fontFamily: "NanumGothic",
                 fontSize: "24px"
             })
@@ -64,7 +64,7 @@ class MenuScene extends Phaser.Scene {
 
         // 접속중인 플레이어 수 받기
         this.socket.on("getPlayers", (players) => {
-            this.onlinePlayerText.setText(players + " 접속중");
+            this.onlinePlayerText.setText(players + " 게임중");
         });
     }
 

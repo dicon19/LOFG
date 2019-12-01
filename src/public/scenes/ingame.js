@@ -12,10 +12,32 @@ class IngameScene extends Phaser.Scene {
         this.bullets = this.add.group();
         this.enemyArrows = this.add.group();
 
+        // TODO 체팅창 구현
+        // this.chat = this.add.dom(130, 640).createFromCache("chatform");
+        // this.chat.setScrollFactor(0);
+
+        // TODO 메뉴 구현
+        this.isMenu = false;
+        this.escKey = this.input.keyboard.addKey("ESC");
+        this.escKey.on("down", () => {
+            if (!this.isMenu) {
+                this.menu = this.add
+                    .graphics()
+                    .setScrollFactor(0)
+                    .setDepth(1000);
+                this.menu.fillStyle(0x000000, 0.6);
+                this.menu.fillRoundedRect(0, 0, 1280, 720, 0);
+                this.isMenu = true;
+            } else {
+                this.menu.destroy();
+                this.isMenu = false;
+            }
+        });
+
         // 핑 보내기
-        let startTime;
+        this.latency = 0;
         setInterval(() => {
-            startTime = Date.now();
+            this.startTime = Date.now();
             this.socket.emit("latency");
         }, 1000);
 
@@ -48,7 +70,7 @@ class IngameScene extends Phaser.Scene {
             .setDepth(100)
             .setScrollFactor(0);
         this.pingText = this.add
-            .text(390, 85, "0", {
+            .text(390, 85, this.latency, {
                 fontFamily: "NanumGothic",
                 fontSize: "28px"
             })
@@ -175,12 +197,12 @@ class IngameScene extends Phaser.Scene {
 
         // 핑 받기
         this.socket.on("latency", () => {
-            const LATENCY = Date.now() - startTime;
-            this.pingText.setText(LATENCY);
+            this.latency = Date.now() - this.startTime;
+            this.pingText.setText(this.latency);
 
-            if (LATENCY <= 100) {
+            if (this.latency <= 100) {
                 this.ping.setTint(0x00ff7b);
-            } else if (LATENCY <= 150) {
+            } else if (this.latency <= 150) {
                 this.ping.setTint(0xffff00);
             } else {
                 this.ping.setTint(0xff0000);
@@ -201,12 +223,22 @@ class IngameScene extends Phaser.Scene {
     update() {
         // 위치 보간
         this.players.getChildren().forEach((player) => {
-            player.x += (player.dx - player.x) * 0.5;
-            player.y += (player.dy - player.y) * 0.5;
+            this.tweens.add({
+                targets: player,
+                x: { value: player.dx },
+                y: { value: player.dy },
+                ease: "Linear",
+                duration: this.latency
+            });
         });
         this.bullets.getChildren().forEach((bullet) => {
-            bullet.x += (bullet.dx - bullet.x) * 0.5;
-            bullet.y += (bullet.dy - bullet.y) * 0.5;
+            this.tweens.add({
+                targets: bullet,
+                x: { value: bullet.dx },
+                y: { value: bullet.dy },
+                ease: "Linear",
+                duration: this.latency
+            });
         });
 
         // #region UI
@@ -218,7 +250,7 @@ class IngameScene extends Phaser.Scene {
             return b["score"] - a["score"];
         });
 
-        for (let i = 0; i < Math.min(rankings.length, 10); i++) {
+        for (let i = 0; i < Math.min(rankings.length, 9); i++) {
             ranking += "#" + (i + 1) + "  " + rankings[i].name + "\n";
             rankingScore += rankings[i].score + "\n";
         }
@@ -235,24 +267,26 @@ class IngameScene extends Phaser.Scene {
             player.hpBox.fillRect(player.x - 24, player.y - 28, 48, 12);
 
             player.hpBar.clear();
-            player.hpBar.fillStyle(player.instanceId == this.myPlayer.id ? 0x00ff00 : 0xff0000, 0.8);
+            player.hpBar.fillStyle(player.instanceId == this.myPlayer.instanceId ? 0x00ff00 : 0xff0000, 0.8);
             player.hpBar.fillRect(player.x - 24, player.y - 28, (player.hp / player.hpMax) * 48, 12);
         });
         // #endregion
 
         // 플레이어 이동 | 공격
-        const LEFT = this.cursors.left.isDown;
-        const RIGHT = this.cursors.right.isDown;
-        const UP = this.cursors.up.isDown;
-        const ATTACK = this.cursors.space.isDown;
+        if (!this.isMenu) {
+            const LEFT = this.cursors.left.isDown;
+            const RIGHT = this.cursors.right.isDown;
+            const UP = this.cursors.up.isDown;
+            const ATTACK = this.cursors.space.isDown;
 
-        if (LEFT || RIGHT || UP || ATTACK) {
-            this.socket.emit("playerInput", {
-                left: LEFT,
-                right: RIGHT,
-                up: UP,
-                attack: ATTACK
-            });
+            if (LEFT || RIGHT || UP || ATTACK) {
+                this.socket.emit("playerInput", {
+                    left: LEFT,
+                    right: RIGHT,
+                    up: UP,
+                    attack: ATTACK
+                });
+            }
         }
 
         // 다른 플레이어 방향 화살표
@@ -261,8 +295,8 @@ class IngameScene extends Phaser.Scene {
                 if (player.instanceId == arrow.instanceId) {
                     const DIR = Phaser.Math.Angle.Between(this.myPlayer.x, this.myPlayer.y, player.x, player.y);
                     arrow.setAngle(Phaser.Math.RadToDeg(DIR));
-                    arrow.x = this.myPlayer.x + Math.cos(DIR) * 60;
-                    arrow.y = this.myPlayer.y + Math.sin(DIR) * 60;
+                    arrow.x = this.myPlayer.x + Math.cos(DIR) * 40;
+                    arrow.y = this.myPlayer.y + Math.sin(DIR) * 40;
                 }
             });
         });
@@ -294,7 +328,7 @@ class IngameScene extends Phaser.Scene {
             this.myPlayer = PLAYER;
             this.cameras.main.startFollow(PLAYER, true, 0.1, 0.1);
         } else {
-            const ENEMY_ARROW = this.add.sprite(playerInfo.x, playerInfo.y, "enemyArrow");
+            const ENEMY_ARROW = this.add.sprite(playerInfo.x, playerInfo.y, "enemyArrow").setOrigin(0.5, 0.5);
             this.enemyArrows.add(ENEMY_ARROW);
             ENEMY_ARROW.instanceId = playerInfo.instanceId;
         }
