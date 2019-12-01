@@ -227,7 +227,7 @@ function update() {
     });
 
     // 모든 인스턴스 정보 보내기
-    io.emit("instanceUpdates", INSTANCES, Date.now());
+    io.emit("instanceUpdates", INSTANCES, moment().valueOf());
 }
 
 function createPlayer(self, playerInfo) {

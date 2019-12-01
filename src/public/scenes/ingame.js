@@ -38,7 +38,7 @@ class IngameScene extends Phaser.Scene {
         // 핑 보내기
         this.latency = 0;
         setInterval(() => {
-            this.latencyTime = Date.now();
+            this.latencyTime = moment().valueOf();
             this.socket.emit("latency");
         }, 1000);
 
@@ -191,7 +191,7 @@ class IngameScene extends Phaser.Scene {
             });
 
             // 보간 값 받기
-            this.interpolation = Date.now() - date;
+            this.interpolation = moment().valueOf() - date;
             console.log(this.interpolation);
         });
 
@@ -202,7 +202,7 @@ class IngameScene extends Phaser.Scene {
 
         // 핑 받기
         this.socket.on("latency", () => {
-            this.latency = Date.now() - this.latencyTime;
+            this.latency = moment().valueOf() - this.latencyTime;
             this.pingText.setText(this.latency);
 
             if (this.latency <= 100) {
