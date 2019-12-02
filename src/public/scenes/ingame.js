@@ -11,7 +11,6 @@ class IngameScene extends Phaser.Scene {
         this.players = this.add.group();
         this.bullets = this.add.group();
         this.enemyArrows = this.add.group();
-        this.interpolation = 0;
 
         // TODO 체팅창 구현
         // this.chat = this.add.dom(130, 640).createFromCache("chatform");
@@ -38,9 +37,9 @@ class IngameScene extends Phaser.Scene {
         // 핑 보내기
         this.latency = 0;
         setInterval(() => {
-            this.latencyTime = Date.now();
+            this.latencyStart = Date.now();
             this.socket.emit("latency");
-        }, 1000);
+        }, 500);
 
         // 배경 초기화
         this.cameras.main.setBackgroundColor("#a3cca3");
@@ -71,7 +70,7 @@ class IngameScene extends Phaser.Scene {
             .setDepth(100)
             .setScrollFactor(0);
         this.pingText = this.add
-            .text(390, 85, this.latency, {
+            .text(390, 85, "0", {
                 fontFamily: "NanumGothic",
                 fontSize: "28px"
             })
@@ -189,10 +188,6 @@ class IngameScene extends Phaser.Scene {
                         break;
                 }
             });
-
-            // 보간 값 받기
-            this.interpolation = Date.now() - date;
-            console.log(this.interpolation);
         });
 
         // 타이머 시간 받기
@@ -202,7 +197,7 @@ class IngameScene extends Phaser.Scene {
 
         // 핑 받기
         this.socket.on("latency", () => {
-            this.latency = Date.now() - this.latencyTime;
+            this.latency = Date.now() - this.latencyStart;
             this.pingText.setText(this.latency);
 
             if (this.latency <= 100) {
@@ -233,7 +228,7 @@ class IngameScene extends Phaser.Scene {
                 x: { value: player.dx },
                 y: { value: player.dy },
                 ease: "Linear",
-                duration: this.interpolation
+                duration: this.latency
             });
         });
         this.bullets.getChildren().forEach((bullet) => {
@@ -242,7 +237,7 @@ class IngameScene extends Phaser.Scene {
                 x: { value: bullet.dx },
                 y: { value: bullet.dy },
                 ease: "Linear",
-                duration: this.interpolation
+                duration: this.latency
             });
         });
 
