@@ -12,6 +12,11 @@ class IngameScene extends Phaser.Scene {
         this.bullets = this.add.group();
         this.enemyArrows = this.add.group();
 
+        // 플레이어 점프
+        this.cursors.up.on("down", () => {
+            this.socket.emit("playerJump");
+        });
+
         // TODO 체팅창 구현
         // this.chat = this.add.dom(130, 640).createFromCache("chatform");
         // this.chat.setScrollFactor(0);
@@ -259,6 +264,9 @@ class IngameScene extends Phaser.Scene {
 
         // 플레이어
         this.players.getChildren().forEach((player) => {
+            player.weapon.setPosition(player.x, player.y + 6);
+            player.weapon.flipX = player.flipX;
+
             player.text.setText("[" + player.score + "] " + player.name);
             player.text.setPosition(player.x, player.y - 42);
 
@@ -276,16 +284,17 @@ class IngameScene extends Phaser.Scene {
         if (!this.isMenu) {
             const LEFT = this.cursors.left.isDown;
             const RIGHT = this.cursors.right.isDown;
-            const UP = this.cursors.up.isDown;
             const ATTACK = this.cursors.space.isDown;
 
-            if (LEFT || RIGHT || UP || ATTACK) {
-                this.socket.emit("playerInput", {
+            if (LEFT || RIGHT) {
+                this.socket.emit("playerMove", {
                     left: LEFT,
-                    right: RIGHT,
-                    up: UP,
-                    attack: ATTACK
+                    right: RIGHT
                 });
+            }
+
+            if (ATTACK) {
+                this.socket.emit("playerAttack");
             }
         }
 
@@ -315,6 +324,7 @@ class IngameScene extends Phaser.Scene {
         PLAYER.hp = playerInfo.hp;
 
         // 플레이어 UI
+        PLAYER.weapon = this.add.sprite(playerInfo.x, playerInfo.y + 6, playerInfo.weapon).setOrigin(0.5, 0.5);
         PLAYER.text = this.add
             .text(playerInfo.x, playerInfo.y - 42, "[" + playerInfo.score + "] " + playerInfo.name, {
                 fontFamily: "NanumGothic",

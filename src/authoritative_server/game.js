@@ -96,6 +96,7 @@ function create() {
                 score: 0,
                 hpMax: 100,
                 hp: 100,
+                weapon: "weapon1",
                 isMove: false,
                 flipX: false
             };
@@ -119,8 +120,8 @@ function create() {
             });
         });
 
-        // 플레이어 입력
-        socket.on("playerInput", (inputData) => {
+        // 플레이어 이동
+        socket.on("playerMove", (inputData) => {
             this.players.getChildren().forEach((player) => {
                 if (socket.id == player.instanceId) {
                     // 이동
@@ -133,34 +134,43 @@ function create() {
                             player.flipX = false;
                         }
                     }
+                }
+            });
+        });
 
-                    // 점프
-                    if (inputData.up && player.body.onFloor()) {
-                        player.body.setVelocityY(-player.jumpPower);
-                    }
+        // 플레이어 점프
+        socket.on("playerJump", () => {
+            this.players.getChildren().forEach((player) => {
+                if (player.jumpCount > 0) {
+                    player.body.setVelocityY(-player.jumpPower);
+                    player.jumpCount--;
+                }
+            });
+        });
 
-                    // 공격
-                    if (inputData.attack && player.isAttack) {
-                        const ID = uuidgen();
-                        INSTANCES[ID] = {
-                            instanceId: ID,
-                            instanceType: "bullet",
-                            x: player.x,
-                            y: player.y,
-                            sprite: "bullet1",
-                            attackAt: player.instanceId,
-                            flipX: player.flipX
-                        };
-                        player.attackAlarm = this.time.addEvent({
-                            delay: player.attackDelayTime,
-                            callback: () => {
-                                player.isAttack = true;
-                            }
-                        });
-                        player.isAttack = false;
-                        createBullet(this, INSTANCES[ID]);
-                        io.emit("addBullet", INSTANCES[ID]);
-                    }
+        // 플레이어 공격
+        socket.on("playerAttack", () => {
+            this.players.getChildren().forEach((player) => {
+                if (player.isAttack) {
+                    const ID = uuidgen();
+                    INSTANCES[ID] = {
+                        instanceId: ID,
+                        instanceType: "bullet",
+                        x: player.x,
+                        y: player.y,
+                        sprite: "bullet1",
+                        attackAt: player.instanceId,
+                        flipX: player.flipX
+                    };
+                    player.attackAlarm = this.time.addEvent({
+                        delay: player.attackDelayTime,
+                        callback: () => {
+                            player.isAttack = true;
+                        }
+                    });
+                    player.isAttack = false;
+                    createBullet(this, INSTANCES[ID]);
+                    io.emit("addBullet", INSTANCES[ID]);
                 }
             });
         });
@@ -213,6 +223,10 @@ function update() {
         if (!Phaser.Geom.Rectangle.Overlaps(this.physics.world.bounds, player.getBounds())) {
             playerDead(this, player);
         }
+
+        if (player.body.onFloor()) {
+            player.jumpCount = player.jumpCountMax;
+        }
     });
 
     // 총알 업데이트
@@ -242,9 +256,12 @@ function createPlayer(self, playerInfo) {
     PLAYER.score = playerInfo.score;
     PLAYER.hpMax = playerInfo.hpMax;
     PLAYER.hp = playerInfo.hp;
+    PLAYER.weapon = playerInfo.weapon;
     PLAYER.deadAt = null;
     PLAYER.moveSpeed = 200;
     PLAYER.jumpPower = 400;
+    PLAYER.jumpCountMax = 2;
+    PLAYER.jumpCount = PLAYER.jumpCountMax;
     PLAYER.isAttack = true;
     PLAYER.attackDelayTime = 150;
 }
