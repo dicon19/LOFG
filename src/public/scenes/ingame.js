@@ -336,7 +336,7 @@ class IngameScene extends Phaser.Scene {
 
         if (this.socket.id == playerInfo.instanceId) {
             this.myPlayer = PLAYER;
-            this.cameras.main.startFollow(PLAYER, true, 0.1, 0.1);
+            this.cameras.main.startFollow(PLAYER, true);
         } else {
             const ENEMY_ARROW = this.add.sprite(playerInfo.x, playerInfo.y, "enemyArrow").setOrigin(0.5, 0.5);
             this.enemyArrows.add(ENEMY_ARROW);
