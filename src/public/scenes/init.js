@@ -14,6 +14,8 @@ class InitScene extends Phaser.Scene {
         this.load.image("button", "assets/sprites/button.png");
         this.load.image("timer", "assets/sprites/timer.png");
         this.load.image("ping", "assets/sprites/ping.png");
+        this.load.image("resume", "assets/sprites/resume.png");
+        this.load.image("exit", "assets/sprites/exit.png");
         this.load.image("enemyArrow", "assets/sprites/enemyArrow.png");
 
         this.load.html("nameform", "assets/form/nameform.html");
@@ -40,8 +42,8 @@ class InitScene extends Phaser.Scene {
         // #endregion
 
         // #region 로딩바
-        const LOADING_BAR_X = this.cameras.main.width / 2;
-        const LOADING_BAR_Y = this.cameras.main.height / 2;
+        const LOADING_BAR_X = 640;
+        const LOADING_BAR_Y = 360;
         this.progressBar = this.add.graphics();
         this.progressBox = this.add.graphics();
 
@@ -58,7 +60,7 @@ class InitScene extends Phaser.Scene {
                     fill: "#ffffff"
                 }
             })
-            .setOrigin(0.5, 0.5);
+            .setOrigin(0.5);
 
         this.percentText = this.make
             .text({
@@ -70,7 +72,7 @@ class InitScene extends Phaser.Scene {
                     fill: "#ffffff"
                 }
             })
-            .setOrigin(0.5, 0.5);
+            .setOrigin(0.5);
 
         this.assetText = this.make
             .text({
@@ -82,7 +84,7 @@ class InitScene extends Phaser.Scene {
                     fill: "#ffffff"
                 }
             })
-            .setOrigin(0.5, 0.5);
+            .setOrigin(0.5);
 
         this.load.on("progress", (value) => {
             this.progressBar.clear();

@@ -1,4 +1,5 @@
 let playerCount = 0;
+
 const INSTANCES = {};
 
 const CONFIG = {
@@ -124,7 +125,6 @@ function create() {
         socket.on("playerMove", (inputData) => {
             this.players.getChildren().forEach((player) => {
                 if (socket.id == player.instanceId) {
-                    // 이동
                     if (inputData.left != inputData.right) {
                         if (inputData.left) {
                             player.body.setVelocityX(-player.moveSpeed);
@@ -141,9 +141,11 @@ function create() {
         // 플레이어 점프
         socket.on("playerJump", () => {
             this.players.getChildren().forEach((player) => {
-                if (player.jumpCount > 0) {
-                    player.body.setVelocityY(-player.jumpPower);
-                    player.jumpCount--;
+                if (socket.id == player.instanceId) {
+                    if (player.jumpCount > 0) {
+                        player.body.setVelocityY(-player.jumpPower);
+                        player.jumpCount--;
+                    }
                 }
             });
         });
@@ -151,26 +153,28 @@ function create() {
         // 플레이어 공격
         socket.on("playerAttack", () => {
             this.players.getChildren().forEach((player) => {
-                if (player.isAttack) {
-                    const ID = uuidgen();
-                    INSTANCES[ID] = {
-                        instanceId: ID,
-                        instanceType: "bullet",
-                        x: player.x,
-                        y: player.y,
-                        sprite: "bullet1",
-                        attackAt: player.instanceId,
-                        flipX: player.flipX
-                    };
-                    player.attackAlarm = this.time.addEvent({
-                        delay: player.attackDelayTime,
-                        callback: () => {
-                            player.isAttack = true;
-                        }
-                    });
-                    player.isAttack = false;
-                    createBullet(this, INSTANCES[ID]);
-                    io.emit("addBullet", INSTANCES[ID]);
+                if (socket.id == player.instanceId) {
+                    if (player.isAttack) {
+                        const ID = uuidgen();
+                        INSTANCES[ID] = {
+                            instanceId: ID,
+                            instanceType: "bullet",
+                            x: player.x,
+                            y: player.y,
+                            sprite: "bullet1",
+                            attackAt: player.instanceId,
+                            flipX: player.flipX
+                        };
+                        player.attackAlarm = this.time.addEvent({
+                            delay: player.attackDelayTime,
+                            callback: () => {
+                                player.isAttack = true;
+                            }
+                        });
+                        player.isAttack = false;
+                        createBullet(this, INSTANCES[ID]);
+                        io.emit("addBullet", INSTANCES[ID]);
+                    }
                 }
             });
         });
@@ -244,9 +248,10 @@ function update() {
     io.emit("instanceUpdates", INSTANCES, Date.now());
 }
 
-function createPlayer(self, playerInfo) {
-    const PLAYER = self.physics.add.sprite(playerInfo.x, playerInfo.y, playerInfo.sprite);
-    self.players.add(PLAYER);
+function createPlayer(scene, playerInfo) {
+    const PLAYER = scene.physics.add.sprite(playerInfo.x, playerInfo.y, playerInfo.sprite);
+    scene.players.add(PLAYER);
+
     PLAYER.body.setBounce(0, 0);
     PLAYER.body.setDragX(0.9);
     PLAYER.body.setMaxSpeed(600);
@@ -266,9 +271,10 @@ function createPlayer(self, playerInfo) {
     PLAYER.attackDelayTime = 150;
 }
 
-function createBullet(self, bulletInfo) {
-    const BULLET = self.physics.add.sprite(bulletInfo.x, bulletInfo.y, bulletInfo.sprite);
-    self.bullets.add(BULLET);
+function createBullet(scene, bulletInfo) {
+    const BULLET = scene.physics.add.sprite(bulletInfo.x, bulletInfo.y, bulletInfo.sprite);
+    scene.bullets.add(BULLET);
+
     BULLET.body.setVelocityX(!bulletInfo.flipX ? 600 : -600);
     BULLET.body.setMaxSpeed(600);
     BULLET.body.allowGravity = false;
@@ -286,9 +292,9 @@ function destroyBullet(bullet) {
     io.emit("destroyBullet", bullet.instanceId);
 }
 
-function playerDead(self, player) {
+function playerDead(scene, player) {
     if (player.deadAt != null) {
-        self.players.getChildren().forEach((_player) => {
+        scene.players.getChildren().forEach((_player) => {
             if (player.deadAt == _player.instanceId) {
                 _player.score++;
             }
@@ -298,7 +304,7 @@ function playerDead(self, player) {
         // 자살 페널티
         player.score--;
     }
-    player.body.reset(100 + Math.floor(Math.random() * self.map.widthInPixels - 100), 100);
+    player.body.reset(100 + Math.floor(Math.random() * scene.map.widthInPixels - 100), 100);
     player.hp = player.hpMax;
 }
 

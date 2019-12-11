@@ -8,36 +8,17 @@ class IngameScene extends Phaser.Scene {
         this.socket.emit("ingame", name, skin);
 
         this.cursors = this.input.keyboard.createCursorKeys();
+        this.escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+
         this.players = this.add.group();
         this.bullets = this.add.group();
         this.enemyArrows = this.add.group();
 
-        // 플레이어 점프
-        this.cursors.up.on("down", () => {
-            this.socket.emit("playerJump");
-        });
+        this.isMenu = false;
 
         // TODO 체팅창 구현
         // this.chat = this.add.dom(130, 640).createFromCache("chatform");
         // this.chat.setScrollFactor(0);
-
-        // TODO 메뉴 구현
-        this.isMenu = false;
-        this.escKey = this.input.keyboard.addKey("ESC");
-        this.escKey.on("down", () => {
-            if (!this.isMenu) {
-                this.menu = this.add
-                    .graphics()
-                    .setScrollFactor(0)
-                    .setDepth(1000);
-                this.menu.fillStyle(0x000000, 0.6);
-                this.menu.fillRoundedRect(0, 0, 1280, 720, 0);
-                this.isMenu = true;
-            } else {
-                this.menu.destroy();
-                this.isMenu = false;
-            }
-        });
 
         // 핑 보내기
         this.latency = 0;
@@ -57,10 +38,12 @@ class IngameScene extends Phaser.Scene {
             .setScrollFactor(0);
         this.timerBox.fillStyle(0x808080, 0.8);
         this.timerBox.fillRoundedRect(40, 70, 230, 65, 30);
+
         this.timer = this.add
             .sprite(80, 100, "timer")
             .setDepth(100)
             .setScrollFactor(0);
+
         this.timerText = this.add
             .text(120, 75, "00:00", {
                 fontFamily: "NanumGothic",
@@ -74,6 +57,7 @@ class IngameScene extends Phaser.Scene {
             .sprite(360, 100, "ping")
             .setDepth(100)
             .setScrollFactor(0);
+
         this.pingText = this.add
             .text(390, 85, "0", {
                 fontFamily: "NanumGothic",
@@ -90,6 +74,7 @@ class IngameScene extends Phaser.Scene {
             })
             .setDepth(100)
             .setScrollFactor(0);
+
         this.rankingText = this.add
             .text(1080, 100, "", {
                 fontFamily: "NanumGothic",
@@ -97,6 +82,7 @@ class IngameScene extends Phaser.Scene {
             })
             .setDepth(100)
             .setScrollFactor(0);
+
         this.rankingScoreText = this.add
             .text(1240, 100, "", {
                 fontFamily: "NanumGothic",
@@ -161,7 +147,7 @@ class IngameScene extends Phaser.Scene {
         });
 
         // 모든 인스턴스 업데이트
-        this.socket.on("instanceUpdates", (instances, date) => {
+        this.socket.on("instanceUpdates", (instances) => {
             Object.keys(instances).forEach((id) => {
                 const INSTANCE_INFO = instances[id];
 
@@ -226,6 +212,48 @@ class IngameScene extends Phaser.Scene {
     }
 
     update() {
+        // 일시정지
+        if (Phaser.Input.Keyboard.JustDown(this.escKey)) {
+            if (!this.isMenu) {
+                this.menu = this.add
+                    .graphics()
+                    .setScrollFactor(0)
+                    .setDepth(200);
+                this.menu.fillStyle(0x000000, 0.6);
+                this.menu.fillRoundedRect(0, 0, 1280, 720, 0);
+
+                this.logo = this.add
+                    .sprite(640, 240, "logo")
+                    .setScrollFactor(0)
+                    .setDepth(300);
+
+                this.resume = new Button(this, 640, 460, "resume", () => {
+                    this.menu.destroy();
+                    this.logo.destroy();
+                    this.resume.destroy();
+                    this.exit.destroy();
+                    this.isMenu = false;
+                });
+                this.resume.setScrollFactor(0);
+                this.resume.setDepth(300);
+
+                this.exit = new Button(this, 640, 580, "exit", () => {
+                    this.socket.disconnect();
+                    this.scene.start("menuScene");
+                });
+                this.exit.setScrollFactor(0);
+                this.exit.setDepth(300);
+
+                this.isMenu = true;
+            } else {
+                this.menu.destroy();
+                this.logo.destroy();
+                this.resume.destroy();
+                this.exit.destroy();
+                this.isMenu = false;
+            }
+        }
+
         // 위치 보간
         this.players.getChildren().forEach((player) => {
             this.tweens.add({
@@ -293,6 +321,10 @@ class IngameScene extends Phaser.Scene {
                 });
             }
 
+            if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
+                this.socket.emit("playerJump");
+            }
+
             if (ATTACK) {
                 this.socket.emit("playerAttack");
             }
@@ -312,7 +344,7 @@ class IngameScene extends Phaser.Scene {
     }
 
     createPlayer(playerInfo) {
-        const PLAYER = this.add.sprite(playerInfo.x, playerInfo.y, playerInfo.sprite).setOrigin(0.5, 0.5);
+        const PLAYER = this.add.sprite(playerInfo.x, playerInfo.y, playerInfo.sprite);
         this.players.add(PLAYER);
 
         PLAYER.instanceId = playerInfo.instanceId;
@@ -324,13 +356,13 @@ class IngameScene extends Phaser.Scene {
         PLAYER.hp = playerInfo.hp;
 
         // 플레이어 UI
-        PLAYER.weapon = this.add.sprite(playerInfo.x, playerInfo.y + 6, playerInfo.weapon).setOrigin(0.5, 0.5);
+        PLAYER.weapon = this.add.sprite(playerInfo.x, playerInfo.y + 6, playerInfo.weapon);
         PLAYER.text = this.add
             .text(playerInfo.x, playerInfo.y - 42, "[" + playerInfo.score + "] " + playerInfo.name, {
                 fontFamily: "NanumGothic",
                 fontSize: "14px"
             })
-            .setOrigin(0.5, 0.5);
+            .setOrigin(0.5);
         PLAYER.hpBox = this.add.graphics();
         PLAYER.hpBar = this.add.graphics();
 
@@ -338,14 +370,15 @@ class IngameScene extends Phaser.Scene {
             this.myPlayer = PLAYER;
             this.cameras.main.startFollow(PLAYER, true);
         } else {
-            const ENEMY_ARROW = this.add.sprite(playerInfo.x, playerInfo.y, "enemyArrow").setOrigin(0.5, 0.5);
+            const ENEMY_ARROW = this.add.sprite(playerInfo.x, playerInfo.y, "enemyArrow");
             this.enemyArrows.add(ENEMY_ARROW);
+
             ENEMY_ARROW.instanceId = playerInfo.instanceId;
         }
     }
 
     createBullet(bulletInfo) {
-        const BULLET = this.add.sprite(bulletInfo.x, bulletInfo.y, bulletInfo.sprite).setOrigin(0.5, 0.5);
+        const BULLET = this.add.sprite(bulletInfo.x, bulletInfo.y, bulletInfo.sprite);
         this.bullets.add(BULLET);
 
         BULLET.instanceId = bulletInfo.instanceId;

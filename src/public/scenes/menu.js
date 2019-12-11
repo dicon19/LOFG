@@ -7,11 +7,11 @@ class MenuScene extends Phaser.Scene {
         this.socket = io();
 
         // 배경 초기화
-        this.background = this.add.sprite(0, 0, "background1").setOrigin(0, 0);
+        this.background = this.add.sprite(0, 0, "background1").setOrigin(0);
 
         // #region UI
         // 로고
-        this.logo = this.add.sprite(640, 240, "logo").setOrigin(0.5, 0.5);
+        this.logo = this.add.sprite(640, 240, "logo");
 
         // 접속중인 플레이어 수
         this.onlinePlayerText = this.add
@@ -19,7 +19,7 @@ class MenuScene extends Phaser.Scene {
                 fontFamily: "NanumGothic",
                 fontSize: "24px"
             })
-            .setOrigin(0.5, 0.5);
+            .setOrigin(0.5);
 
         // 이름 입력 창
         this.element = this.add.dom(640, 460).createFromCache("nameform");
@@ -39,36 +39,19 @@ class MenuScene extends Phaser.Scene {
         });
 
         // 커스텀마이즈 씬 이동 버튼
-        this.customize = this.add
-            .sprite(120, 600, "customize")
-            .setOrigin(0.5, 0.5)
-            .setInteractive()
-            .on("pointerover", () => {
-                this.customize.setTint(0xcccccc);
-                this.customize.dscale = 1.2;
-            })
-            .on("pointerout", () => {
-                this.customize.setTint(0xffffff);
-                this.customize.dscale = 1;
-            })
-            .on("pointerup", () => {
-                name = this.element.getChildByName("nameField").value;
-                this.socket.disconnect();
-                this.scene.start("customizeScene");
-            });
-        this.customize.dscale = 1;
+        this.customize = new Button(this, 100, 600, "customize", () => {
+            name = this.element.getChildByName("nameField").value;
+            this.socket.disconnect();
+            this.scene.start("customizeScene");
+        });
 
         // 페이스북
-        this.facebook = this.add.sprite(1160, 600, "facebook").setOrigin(0.5, 0.5);
+        this.facebook = this.add.sprite(1160, 600, "facebook");
         // #endregion
 
         // 접속중인 플레이어 수 받기
         this.socket.on("getPlayers", (players) => {
             this.onlinePlayerText.setText(players + " 게임중");
         });
-    }
-
-    update() {
-        this.customize.scale += (this.customize.dscale - this.customize.scale) / 10;
     }
 }
