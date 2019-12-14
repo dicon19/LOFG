@@ -114,6 +114,7 @@ class IngameScene extends Phaser.Scene {
         this.socket.on("disconnect", (playerId) => {
             this.players.getChildren().forEach((player) => {
                 if (playerId == player.instanceId) {
+                    player.weapon.destroy();
                     player.text.destroy();
                     player.hpBox.destroy();
                     player.hpBar.destroy();

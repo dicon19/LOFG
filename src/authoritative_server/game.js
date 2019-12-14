@@ -99,6 +99,7 @@ function create() {
                 hp: 100,
                 weapon: "weapon1",
                 isMove: false,
+                isWall: false,
                 flipX: false
             };
             createPlayer(this, INSTANCES[socket.id]);
@@ -193,7 +194,19 @@ function create() {
     this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 
     // 충돌 설정
-    this.physics.add.collider(this.players, this.worldLayer);
+    this.physics.add.collider(
+        this.players,
+        this.worldLayer,
+        null,
+        (obj1, obj2) => {
+            if (obj1.y < obj2.y * 32) {
+                return true;
+            } else {
+                return false;
+            }
+        },
+        this
+    );
     this.physics.add.overlap(this.players, this.bullets, (player, bullet) => {
         if (player.instanceId != bullet.attackAt) {
             player.body.setVelocityX(bullet.knockbackPower * !bullet.flipX ? 500 : -500);
@@ -222,14 +235,21 @@ function update() {
         PLAYER_INFO.score = player.score;
         PLAYER_INFO.hp = player.hp;
         PLAYER_INFO.isMove = Math.abs(player.body.velocity.x) > 20;
+        PLAYER_INFO.isWall = player.isWall;
         PLAYER_INFO.flipX = player.flipX;
+
+        player.isWall = (player.body.blocked.left || player.body.blocked.right) && player.body.velocity.y > 0;
+
+        if (player.isWall || player.body.blocked.down) {
+            player.jumpCount = player.jumpCountMax;
+        }
+
+        if (player.isWall) {
+            player.body.velocity.y /= 2;
+        }
 
         if (!Phaser.Geom.Rectangle.Overlaps(this.physics.world.bounds, player.getBounds())) {
             playerDead(this, player);
-        }
-
-        if (player.body.onFloor()) {
-            player.jumpCount = player.jumpCountMax;
         }
     });
 
@@ -263,10 +283,11 @@ function createPlayer(scene, playerInfo) {
     PLAYER.hp = playerInfo.hp;
     PLAYER.weapon = playerInfo.weapon;
     PLAYER.deadAt = null;
-    PLAYER.moveSpeed = 200;
+    PLAYER.moveSpeed = 300;
     PLAYER.jumpPower = 400;
     PLAYER.jumpCountMax = 2;
     PLAYER.jumpCount = PLAYER.jumpCountMax;
+    PLAYER.isWall = false;
     PLAYER.isAttack = true;
     PLAYER.attackDelayTime = 150;
 }
@@ -308,7 +329,6 @@ function playerDead(scene, player) {
     player.hp = player.hpMax;
 }
 
-// 유틸리티
 function uuidgen() {
     function s4() {
         return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
