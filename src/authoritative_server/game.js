@@ -128,13 +128,32 @@ function create() {
                 if (socket.id == player.instanceId) {
                     if (inputData.left != inputData.right) {
                         if (inputData.left) {
+                            if (!player.isWall) {
+                                player.flipX = true;
+                            }
                             player.body.setVelocityX(-player.moveSpeed);
-                            player.flipX = true;
                         } else if (inputData.right) {
+                            if (!player.isWall) {
+                                player.flipX = false;
+                            }
                             player.body.setVelocityX(player.moveSpeed);
-                            player.flipX = false;
                         }
                     }
+                }
+            });
+        });
+
+        // 플레이어 플랫폼 내려가기
+        socket.on("playerDown", () => {
+            this.players.getChildren().forEach((player) => {
+                if (socket.id == player.instanceId) {
+                    player.isDown = true;
+                    player.downAlarm = this.time.addEvent({
+                        delay: 300,
+                        callback: () => {
+                            player.isDown = false;
+                        }
+                    });
                 }
             });
         });
@@ -199,7 +218,7 @@ function create() {
         this.worldLayer,
         null,
         (obj1, obj2) => {
-            if (obj1.y < obj2.y * 32) {
+            if (obj1.y < obj2.y * 32 && !obj1.isDown) {
                 return true;
             } else {
                 return false;
@@ -238,14 +257,23 @@ function update() {
         PLAYER_INFO.isWall = player.isWall;
         PLAYER_INFO.flipX = player.flipX;
 
-        player.isWall = (player.body.blocked.left || player.body.blocked.right) && player.body.velocity.y > 0;
+        // 벽타기
+        if ((player.body.blocked.left || player.body.blocked.right) && !player.body.blocked.down) {
+            if (!player.isWall) {
+                player.flipX = player.flipX == true ? false : true;
+                player.isWall = true;
+            }
 
-        if (player.isWall || player.body.blocked.down) {
-            player.jumpCount = player.jumpCountMax;
+            if (player.body.velocity.y > 0) {
+                player.body.velocity.y /= 1.3;
+            }
+        } else {
+            player.isWall = false;
         }
 
-        if (player.isWall) {
-            player.body.velocity.y /= 2;
+        // 벽점프
+        if (player.isWall || player.body.blocked.down) {
+            player.jumpCount = player.jumpCountMax;
         }
 
         if (!Phaser.Geom.Rectangle.Overlaps(this.physics.world.bounds, player.getBounds())) {
@@ -288,6 +316,7 @@ function createPlayer(scene, playerInfo) {
     PLAYER.jumpCountMax = 2;
     PLAYER.jumpCount = PLAYER.jumpCountMax;
     PLAYER.isWall = false;
+    PLAYER.isDown = false;
     PLAYER.isAttack = true;
     PLAYER.attackDelayTime = 150;
 }

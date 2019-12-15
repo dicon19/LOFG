@@ -322,6 +322,10 @@ class IngameScene extends Phaser.Scene {
                 });
             }
 
+            if (Phaser.Input.Keyboard.JustDown(this.cursors.down)) {
+                this.socket.emit("playerDown");
+            }
+
             if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
                 this.socket.emit("playerJump");
             }

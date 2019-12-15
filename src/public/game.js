@@ -10,8 +10,7 @@ const CONFIG = {
     dom: {
         createContainer: true
     },
-    scene: [InitScene, MenuScene, CustomizeScene, IngameScene],
-    pixelArt: true
+    scene: [InitScene, MenuScene, CustomizeScene, IngameScene]
 };
 
 class Button extends Phaser.GameObjects.Sprite {
