@@ -87,6 +87,8 @@ function create() {
         socket.on("ingame", (name, skin) => {
             console.log("a player connected");
             playerCount++;
+            io.emit("getPlayers", playerCount);
+
             INSTANCES[socket.id] = {
                 instanceId: socket.id,
                 instanceType: "player",
@@ -105,7 +107,6 @@ function create() {
             createPlayer(this, INSTANCES[socket.id]);
             socket.emit("currentInstances", INSTANCES);
             socket.broadcast.emit("addPlayer", INSTANCES[socket.id]);
-            io.emit("getPlayers", playerCount);
         });
 
         // 플레이어 접속 끊김
@@ -114,10 +115,11 @@ function create() {
                 if (socket.id == player.instanceId) {
                     console.log("player disconnected");
                     playerCount--;
+                    io.emit("getPlayers", playerCount);
+
                     player.destroy();
                     delete INSTANCES[socket.id];
                     io.emit("disconnect", socket.id);
-                    io.emit("getPlayers", playerCount);
                 }
             });
         });
@@ -132,39 +134,14 @@ function create() {
                                 player.flipX = true;
                             }
                             player.body.setVelocityX(-player.moveSpeed);
-                        } else if (inputData.right) {
+                        }
+
+                        if (inputData.right) {
                             if (!player.isWall) {
                                 player.flipX = false;
                             }
                             player.body.setVelocityX(player.moveSpeed);
                         }
-                    }
-                }
-            });
-        });
-
-        // 플레이어 플랫폼 내려가기
-        socket.on("playerDown", () => {
-            this.players.getChildren().forEach((player) => {
-                if (socket.id == player.instanceId) {
-                    player.isDown = true;
-                    player.downAlarm = this.time.addEvent({
-                        delay: 300,
-                        callback: () => {
-                            player.isDown = false;
-                        }
-                    });
-                }
-            });
-        });
-
-        // 플레이어 점프
-        socket.on("playerJump", () => {
-            this.players.getChildren().forEach((player) => {
-                if (socket.id == player.instanceId) {
-                    if (player.jumpCount > 0) {
-                        player.body.setVelocityY(-player.jumpPower);
-                        player.jumpCount--;
                     }
                 }
             });
@@ -194,6 +171,35 @@ function create() {
                         player.isAttack = false;
                         createBullet(this, INSTANCES[ID]);
                         io.emit("addBullet", INSTANCES[ID]);
+                    }
+                }
+            });
+        });
+
+        // 플레이어 점프
+        socket.on("playerJump", () => {
+            this.players.getChildren().forEach((player) => {
+                if (socket.id == player.instanceId) {
+                    if (player.jumpCount > 0) {
+                        player.body.setVelocityY(-player.jumpPower);
+                        player.jumpCount--;
+                    }
+                }
+            });
+        });
+
+        // 플레이어 플랫폼 내려가기
+        socket.on("playerDown", () => {
+            this.players.getChildren().forEach((player) => {
+                if (socket.id == player.instanceId) {
+                    if (!player.isDown && player.body.blocked.down) {
+                        player.downAlarm = this.time.addEvent({
+                            delay: 300,
+                            callback: () => {
+                                player.isDown = false;
+                            }
+                        });
+                        player.isDown = true;
                     }
                 }
             });
@@ -260,7 +266,7 @@ function update() {
         // 벽타기
         if ((player.body.blocked.left || player.body.blocked.right) && !player.body.blocked.down) {
             if (!player.isWall) {
-                player.flipX = player.flipX == true ? false : true;
+                player.flipX = !player.flipX;
                 player.isWall = true;
             }
 

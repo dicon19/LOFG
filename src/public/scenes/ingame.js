@@ -31,7 +31,7 @@ class IngameScene extends Phaser.Scene {
         this.cameras.main.setBackgroundColor("#a3cca3");
 
         // #region UI
-        // 게임 제한 시간 타이머
+        // 게임 제한시간 타이머
         this.timerBox = this.add
             .graphics()
             .setDepth(100)
@@ -309,7 +309,7 @@ class IngameScene extends Phaser.Scene {
         });
         // #endregion
 
-        // 플레이어 이동 | 공격
+        // 플레이어 입력값
         if (!this.isMenu) {
             const LEFT = this.cursors.left.isDown;
             const RIGHT = this.cursors.right.isDown;
@@ -322,20 +322,20 @@ class IngameScene extends Phaser.Scene {
                 });
             }
 
-            if (Phaser.Input.Keyboard.JustDown(this.cursors.down)) {
-                this.socket.emit("playerDown");
+            if (ATTACK) {
+                this.socket.emit("playerAttack");
             }
 
             if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
                 this.socket.emit("playerJump");
             }
 
-            if (ATTACK) {
-                this.socket.emit("playerAttack");
+            if (Phaser.Input.Keyboard.JustDown(this.cursors.down)) {
+                this.socket.emit("playerDown");
             }
         }
 
-        // 다른 플레이어 방향 화살표
+        // 플레이어 방향 화살표
         this.players.getChildren().forEach((player) => {
             this.enemyArrows.getChildren().forEach((arrow) => {
                 if (player.instanceId == arrow.instanceId) {
