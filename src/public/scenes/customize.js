@@ -7,9 +7,8 @@ class CustomizeScene extends Phaser.Scene {
         this.pos = SKINS.indexOf(skin);
 
         // 배경 초기화
-        this.cameras.main.setBackgroundColor("#81c147");
+        this.cameras.main.setBackgroundColor("#000000");
 
-        // #region UI
         this.helpText = this.add
             .text(640, 180, "캐릭터 선택", {
                 fontFamily: "NanumGothic",
@@ -50,6 +49,5 @@ class CustomizeScene extends Phaser.Scene {
             .sprite(640, 360, skin)
             .setScale(3)
             .anims.play(skin + "_move", true);
-        // #endregion
     }
 }

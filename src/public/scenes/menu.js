@@ -9,7 +9,6 @@ class MenuScene extends Phaser.Scene {
         // 배경 초기화
         this.background = this.add.sprite(0, 0, "background1").setOrigin(0);
 
-        // #region UI
         // 로고
         this.logo = this.add.sprite(640, 240, "logo");
 
@@ -45,9 +44,12 @@ class MenuScene extends Phaser.Scene {
             this.scene.start("customizeScene");
         });
 
-        // 페이스북
-        this.facebook = this.add.sprite(1160, 600, "facebook");
-        // #endregion
+        // 크래딧 씬 이동 버튼
+        this.credit = new Button(this, 1160, 600, "credit", () => {
+            name = this.element.getChildByName("nameField").value;
+            this.socket.disconnect();
+            this.scene.start("creditScene");
+        });
 
         // 접속중인 플레이어 수 받기
         this.socket.on("getPlayers", (players) => {

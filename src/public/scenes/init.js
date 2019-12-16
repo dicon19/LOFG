@@ -4,44 +4,52 @@ class InitScene extends Phaser.Scene {
     }
 
     preload() {
-        // #region 리소스 불러오기
-        this.load.image("background1", "assets/backgrounds/background1.png");
+        // 리소스 불러오기
+        this.load.image("background1", "assets/backgrounds/bg_menu.png");
+        this.load.image("logo", "assets/sprites/spr_logo.png");
+        this.load.image("customize", "assets/sprites/spr_button_customize.png");
+        this.load.image("credit", "assets/sprites/spr_button_credit.png");
+        this.load.image("arrow", "assets/sprites/spr_button_arrow.png");
+        this.load.image("button", "assets/sprites/spr_button.png");
+        this.load.image("timer", "assets/sprites/spr_timer.png");
+        this.load.image("ping", "assets/sprites/spr_ping.png");
+        this.load.image("resume", "assets/sprites/spr_button_resume.png");
+        this.load.image("exit", "assets/sprites/spr_button_exit.png");
+        this.load.image("enemyArrow", "assets/sprites/spr_enemy_arrow.png");
+        this.load.image("weapon1", "assets/sprites/spr_weapon1.png");
+        this.load.image("bullet1", "assets/sprites/spr_bullet1.png");
+        this.load.image("tileset1", "assets/tilesets/tile_moon.png");
 
-        this.load.image("logo", "assets/sprites/logo.png");
-        this.load.image("customize", "assets/sprites/customize.png");
-        this.load.image("facebook", "assets/sprites/facebook.png");
-        this.load.image("arrow", "assets/sprites/arrow.png");
-        this.load.image("button", "assets/sprites/button.png");
-        this.load.image("timer", "assets/sprites/timer.png");
-        this.load.image("ping", "assets/sprites/ping.png");
-        this.load.image("resume", "assets/sprites/resume.png");
-        this.load.image("exit", "assets/sprites/exit.png");
-        this.load.image("enemyArrow", "assets/sprites/enemyArrow.png");
+        this.load.tilemapTiledJSON("map1", "assets/tilemaps/map_moon1.json");
 
-        this.load.html("nameform", "assets/form/nameform.html");
-        this.load.html("chatform", "assets/form/chatform.html");
+        this.load.html("nameform", "assets/forms/form_name.html");
+        this.load.html("chatform", "assets/forms/form_chat.html");
 
         for (let i = 1; i <= SKINS.length; i++) {
-            this.load.spritesheet("player" + i + "_idle", "assets/animations/player" + i + "_idle.png", {
+            this.load.spritesheet("player" + i + "_idle", "assets/animations/anim_player" + i + "_idle.png", {
                 frameWidth: 32,
                 frameHeight: 32
             });
-            this.load.spritesheet("player" + i + "_move", "assets/animations/player" + i + "_move.png", {
+            this.load.spritesheet("player" + i + "_move", "assets/animations/anim_player" + i + "_move.png", {
                 frameWidth: 32,
                 frameHeight: 32
             });
         }
-        this.load.image("weapon1", "assets/sprites/weapon1.png");
-        this.load.image("bullet1", "assets/sprites/bullet1.png");
 
-        this.load.image("tileset1", "assets/tilesets/tileset1.png");
-        this.load.tilemapTiledJSON("map1", "assets/tilemaps/map1.json");
+        this.load.audio("ageOfWar", "assets/sounds/bgm_age_of_war.ogg");
+        this.load.audio("battle3", "assets/sounds/bgm_battle_3.ogg");
+        this.load.audio("dejaVu", "assets/sounds/bgm_deja_vu.ogg");
+        this.load.audio("attack1", "assets/sounds/sfx_attack1.ogg");
+        this.load.audio("clickHover", "assets/sounds/sfx_click_hover.ogg");
+        this.load.audio("clickOn", "assets/sounds/sfx_click_on.ogg");
+        this.load.audio("coin", "assets/sounds/sfx_coin.ogg");
+        this.load.audio("heavyMachineGun", "assets/sounds/sfx_heavy_machine_gun.ogg");
+        this.load.audio("noAmmo", "assets/sounds/sfx_no_ammo.ogg");
+        this.load.audio("playerDead", "assets/sounds/sfx_player_dead.ogg");
+        this.load.audio("shotgun", "assets/sounds/sfx_shotgun.ogg");
+        this.load.audio("timeOver", "assets/sounds/sfx_time_over.ogg");
 
-        this.load.audio("bgm1", "assets/sounds/bgm/bgm1.mp3");
-        this.load.audio("hurt", "assets/sounds/sfx/hurt.mp3");
-        // #endregion
-
-        // #region 로딩바
+        // 로딩바
         const LOADING_BAR_X = 640;
         const LOADING_BAR_Y = 360;
         this.progressBar = this.add.graphics();
@@ -104,7 +112,6 @@ class InitScene extends Phaser.Scene {
             this.percentText.destroy();
             this.assetText.destroy();
         });
-        // #endregion
     }
 
     create() {
@@ -125,7 +132,7 @@ class InitScene extends Phaser.Scene {
         }
 
         // 배경음악 재생
-        bgm = this.sound.add("bgm1", {
+        let bgm = this.sound.add("ageOfWar", {
             mute: false,
             volume: 0.5,
             rate: 1,

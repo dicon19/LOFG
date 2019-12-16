@@ -29,18 +29,18 @@ function WebGLTexture() {}
 
 function preload() {
     // 리소스 불러오기
-    this.load.image("player1", "assets/sprites/player1.png");
-    this.load.image("player2", "assets/sprites/player2.png");
-    this.load.image("player3", "assets/sprites/player3.png");
-    this.load.image("player4", "assets/sprites/player4.png");
-    this.load.image("player5", "assets/sprites/player5.png");
-    this.load.image("player6", "assets/sprites/player6.png");
-    this.load.image("player7", "assets/sprites/player7.png");
-    this.load.image("player8", "assets/sprites/player8.png");
-    this.load.image("bullet1", "assets/sprites/bullet1.png");
+    this.load.image("player1", "assets/sprites/spr_player1.png");
+    this.load.image("player2", "assets/sprites/spr_player2.png");
+    this.load.image("player3", "assets/sprites/spr_player3.png");
+    this.load.image("player4", "assets/sprites/spr_player4.png");
+    this.load.image("player5", "assets/sprites/spr_player5.png");
+    this.load.image("player6", "assets/sprites/spr_player6.png");
+    this.load.image("player7", "assets/sprites/spr_player7.png");
+    this.load.image("player8", "assets/sprites/spr_player8.png");
+    this.load.image("bullet1", "assets/sprites/spr_bullet1.png");
+    this.load.image("tileset1", "assets/tilesets/tile_moon.png");
 
-    this.load.image("tileset1", "assets/tilesets/tileset1.png");
-    this.load.tilemapTiledJSON("map1", "assets/tilemaps/map1.json");
+    this.load.tilemapTiledJSON("map1", "assets/tilemaps/map_moon1.json");
 }
 
 function create() {
@@ -362,6 +362,7 @@ function playerDead(scene, player) {
     }
     player.body.reset(100 + Math.floor(Math.random() * scene.map.widthInPixels - 100), 100);
     player.hp = player.hpMax;
+    io.emit("playerDead", INSTANCES[player.instanceId]);
 }
 
 function uuidgen() {

@@ -10,7 +10,7 @@ const CONFIG = {
     dom: {
         createContainer: true
     },
-    scene: [InitScene, MenuScene, CustomizeScene, IngameScene]
+    scene: [InitScene, MenuScene, CustomizeScene, CreditScene, IngameScene]
 };
 
 class Button extends Phaser.GameObjects.Sprite {
@@ -48,8 +48,19 @@ class Button extends Phaser.GameObjects.Sprite {
     }
 }
 
-function choose(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
+function shuffle(a) {
+    var j, x, i;
+    for (i = a.length - 1; i > 0; i--) {
+        j = Math.floor(Math.random() * (i + 1));
+        x = a[i];
+        a[i] = a[j];
+        a[j] = x;
+    }
+    return a;
+}
+
+function choose(a) {
+    return a[Math.floor(Math.random() * a.length)];
 }
 
 const GAME = new Phaser.Game(CONFIG);

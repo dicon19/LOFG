@@ -147,6 +147,16 @@ class IngameScene extends Phaser.Scene {
             });
         });
 
+        // 플레이어 죽음
+        this.socket.on("playerDead", (playerInfo) => {
+            this.players.getChildren().forEach((player) => {
+                if (playerInfo.instanceId == player.instanceId) {
+                    player.x = playerInfo.x;
+                    player.y = playerInfo.y;
+                }
+            });
+        });
+
         // 모든 인스턴스 업데이트
         this.socket.on("instanceUpdates", (instances) => {
             Object.keys(instances).forEach((id) => {
@@ -275,7 +285,6 @@ class IngameScene extends Phaser.Scene {
             });
         });
 
-        // #region UI
         // 랭킹
         let ranking = "";
         let rankingScore = "";
@@ -307,7 +316,6 @@ class IngameScene extends Phaser.Scene {
             player.hpBar.fillStyle(player.instanceId == this.myPlayer.instanceId ? 0x00ff00 : 0xff0000, 0.8);
             player.hpBar.fillRect(player.x - 24, player.y - 28, (player.hp / player.hpMax) * 48, 12);
         });
-        // #endregion
 
         // 플레이어 입력값
         if (!this.isMenu) {
