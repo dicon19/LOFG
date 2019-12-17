@@ -16,10 +16,6 @@ class IngameScene extends Phaser.Scene {
 
         this.isMenu = false;
 
-        // TODO 체팅창 구현
-        // this.chat = this.add.dom(130, 640).createFromCache("chatform");
-        // this.chat.setScrollFactor(0);
-
         // 핑 보내기
         this.latency = 0;
         setInterval(() => {
@@ -136,6 +132,10 @@ class IngameScene extends Phaser.Scene {
         // 플레이어 총알 발사
         this.socket.on("addBullet", (bulletInfo) => {
             this.createBullet(bulletInfo);
+
+            if (bulletInfo.attackAt == this.myPlayer.instanceId) {
+                sfxAttack1.play();
+            }
         });
 
         // 플레이어 총알 파괴
@@ -147,6 +147,11 @@ class IngameScene extends Phaser.Scene {
             });
         });
 
+        // 플레이어 점프
+        this.socket.on("playerJump", () => {
+            sfxPlayerJump.play();
+        });
+
         // 플레이어 죽음
         this.socket.on("playerDead", (playerInfo) => {
             this.players.getChildren().forEach((player) => {
@@ -155,6 +160,10 @@ class IngameScene extends Phaser.Scene {
                     player.y = playerInfo.y;
                 }
             });
+
+            if (playerInfo.instanceId == this.myPlayer.instanceId) {
+                sfxPlayerDead.play();
+            }
         });
 
         // 모든 인스턴스 업데이트
@@ -220,9 +229,26 @@ class IngameScene extends Phaser.Scene {
 
         // 카메라 초기화
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
+
+        // 배경음악 재생
+        bgmScheme.stop();
+        shuffle(ingameBgm);
+        ingameBgmIndex = 0;
+        ingameBgm[ingameBgmIndex].play();
     }
 
     update() {
+        // 배경음악 연속재생
+        if (!ingameBgm[ingameBgmIndex].isPlaying) {
+            if (ingameBgmIndex < ingameBgm.length - 1) {
+                ingameBgmIndex++;
+            } else {
+                shuffle(ingameBgm);
+                ingameBgmIndex = 0;
+            }
+            ingameBgm[ingameBgmIndex].play();
+        }
+
         // 일시정지
         if (Phaser.Input.Keyboard.JustDown(this.escKey)) {
             if (!this.isMenu) {

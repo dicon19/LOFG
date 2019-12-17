@@ -23,7 +23,6 @@ class InitScene extends Phaser.Scene {
         this.load.tilemapTiledJSON("map1", "assets/tilemaps/map_moon1.json");
 
         this.load.html("nameform", "assets/forms/form_name.html");
-        this.load.html("chatform", "assets/forms/form_chat.html");
 
         for (let i = 1; i <= SKINS.length; i++) {
             this.load.spritesheet("player" + i + "_idle", "assets/animations/anim_player" + i + "_idle.png", {
@@ -36,6 +35,7 @@ class InitScene extends Phaser.Scene {
             });
         }
 
+        this.load.audio("scheme", "assets/sounds/bgm_scheme.ogg");
         this.load.audio("ageOfWar", "assets/sounds/bgm_age_of_war.ogg");
         this.load.audio("battle3", "assets/sounds/bgm_battle_3.ogg");
         this.load.audio("dejaVu", "assets/sounds/bgm_deja_vu.ogg");
@@ -46,7 +46,7 @@ class InitScene extends Phaser.Scene {
         this.load.audio("heavyMachineGun", "assets/sounds/sfx_heavy_machine_gun.ogg");
         this.load.audio("noAmmo", "assets/sounds/sfx_no_ammo.ogg");
         this.load.audio("playerDead", "assets/sounds/sfx_player_dead.ogg");
-        this.load.audio("shotgun", "assets/sounds/sfx_shotgun.ogg");
+        this.load.audio("playerJump", "assets/sounds/sfx_player_jump.ogg");
         this.load.audio("timeOver", "assets/sounds/sfx_time_over.ogg");
 
         // 로딩바
@@ -131,17 +131,25 @@ class InitScene extends Phaser.Scene {
             });
         }
 
-        // 배경음악 재생
-        let bgm = this.sound.add("ageOfWar", {
-            mute: false,
-            volume: 0.5,
-            rate: 1,
-            detune: 0,
-            seek: 0,
-            loop: true,
-            delay: 0
-        });
-        bgm.play();
+        // 사운드 추가
+        ingameBgm.push(this.sound.add("ageOfWar"));
+        ingameBgm.push(this.sound.add("battle3"));
+        ingameBgm.push(this.sound.add("dejaVu"));
+        shuffle(ingameBgm);
+
+        bgmScheme = this.sound.add("scheme");
+        sfxAttack1 = this.sound.add("attack1");
+        sfxClickHover = this.sound.add("clickHover");
+        sfxClickOn = this.sound.add("clickOn");
+        sfxCoin = this.sound.add("coin");
+        sfxHeavyMachineGun = this.sound.add("heavyMachineGun");
+        sfxNoAmmo = this.sound.add("noAmmo");
+        sfxPlayerDead = this.sound.add("playerDead");
+        sfxPlayerJump = this.sound.add("playerJump");
+        sfxTimeOver = this.sound.add("timeOver");
+
+        // 띠로링
+        sfxCoin.play();
 
         // 메뉴 씬 이동
         this.scene.start("menuScene");

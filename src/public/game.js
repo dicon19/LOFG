@@ -29,6 +29,7 @@ class Button extends Phaser.GameObjects.Sprite {
                 ease: "Power4",
                 duration: 300
             });
+            sfxClickHover.play();
         });
 
         this.on("pointerout", () => {
@@ -44,6 +45,7 @@ class Button extends Phaser.GameObjects.Sprite {
 
         this.on("pointerup", () => {
             callback();
+            sfxClickOn.play();
         });
     }
 }
@@ -67,4 +69,16 @@ const GAME = new Phaser.Game(CONFIG);
 const SKINS = ["player1", "player2", "player3", "player4", "player5", "player6", "player7", "player8"];
 let name = "";
 let skin = choose(SKINS);
-let bgm;
+
+let ingameBgm = [];
+let ingameBgmIndex = 0;
+let bgmScheme,
+    sfxAttack1,
+    sfxClickHover,
+    sfxClickOn,
+    sfxCoin,
+    sfxHeavyMachineGun,
+    sfxNoAmmo,
+    sfxPlayerDead,
+    sfxPlayerJump,
+    sfxTimeOver;

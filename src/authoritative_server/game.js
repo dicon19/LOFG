@@ -183,6 +183,7 @@ function create() {
                     if (player.jumpCount > 0) {
                         player.body.setVelocityY(-player.jumpPower);
                         player.jumpCount--;
+                        socket.emit("playerJump");
                     }
                 }
             });
@@ -299,7 +300,7 @@ function update() {
     });
 
     // 모든 인스턴스 정보 보내기
-    io.emit("instanceUpdates", INSTANCES, Date.now());
+    io.emit("instanceUpdates", INSTANCES);
 }
 
 function createPlayer(scene, playerInfo) {

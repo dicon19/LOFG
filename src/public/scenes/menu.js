@@ -55,5 +55,12 @@ class MenuScene extends Phaser.Scene {
         this.socket.on("getPlayers", (players) => {
             this.onlinePlayerText.setText(players + " 게임중");
         });
+
+        // 배경음악 재생
+        ingameBgm[ingameBgmIndex].stop();
+
+        if (!bgmScheme.isPlaying) {
+            bgmScheme.play();
+        }
     }
 }
