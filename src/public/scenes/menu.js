@@ -6,7 +6,7 @@ class MenuScene extends Phaser.Scene {
     create() {
         this.socket = io();
 
-        // 배경 초기화
+        // 배경 설정
         this.background = this.add.sprite(0, 0, "background1").setOrigin(0);
 
         // 로고

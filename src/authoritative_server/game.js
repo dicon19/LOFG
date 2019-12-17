@@ -17,7 +17,7 @@ const CONFIG = {
         default: "arcade",
         arcade: {
             gravity: {
-                y: 700
+                y: 800
             }
         }
     }

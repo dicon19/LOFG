@@ -6,8 +6,7 @@ class CustomizeScene extends Phaser.Scene {
     create() {
         this.pos = SKINS.indexOf(skin);
 
-        // 배경 초기화
-        this.cameras.main.setBackgroundColor("#000000");
+        this.cameras.main.fadeIn(1000);
 
         this.helpText = this.add
             .text(640, 180, "캐릭터 선택", {

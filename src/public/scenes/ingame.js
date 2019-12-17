@@ -7,6 +7,9 @@ class IngameScene extends Phaser.Scene {
         this.socket = io();
         this.socket.emit("ingame", name, skin);
 
+        this.cameras.main.setBackgroundColor("#a3cca3");
+        this.cameras.main.fadeIn(1000);
+
         this.cursors = this.input.keyboard.createCursorKeys();
         this.escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
 
@@ -22,9 +25,6 @@ class IngameScene extends Phaser.Scene {
             this.latencyStart = Date.now();
             this.socket.emit("latency");
         }, 500);
-
-        // 배경 초기화
-        this.cameras.main.setBackgroundColor("#a3cca3");
 
         // #region UI
         // 게임 제한시간 타이머
@@ -227,7 +227,7 @@ class IngameScene extends Phaser.Scene {
         this.worldLayer = this.map.createStaticLayer("world", this.tileset, 0, 0);
         this.worldLayer.setDepth(-100);
 
-        // 카메라 초기화
+        // 카메라 설정
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 
         // 배경음악 재생

@@ -104,14 +104,6 @@ class InitScene extends Phaser.Scene {
         this.load.on("fileprogress", (file) => {
             this.assetText.setText("Loading asset: " + file.key);
         });
-
-        this.load.on("complete", () => {
-            this.progressBar.destroy();
-            this.progressBox.destroy();
-            this.loadingText.destroy();
-            this.percentText.destroy();
-            this.assetText.destroy();
-        });
     }
 
     create() {
@@ -152,6 +144,9 @@ class InitScene extends Phaser.Scene {
         sfxCoin.play();
 
         // 메뉴 씬 이동
-        this.scene.start("menuScene");
+        this.cameras.main.fadeOut(4000);
+        this.cameras.main.on("camerafadeoutcomplete", () => {
+            this.scene.start("menuScene");
+        });
     }
 }

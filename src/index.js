@@ -26,7 +26,6 @@ function setupAuthoritativePhaser() {
                 }
             };
             dom.window.URL.revokeObjectURL = (objectURL) => {};
-
             dom.window.gameLoaded = () => {
                 let port = process.env.PORT || 80;
                 server.listen(port, () => {
