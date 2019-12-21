@@ -91,7 +91,7 @@ class IngameScene extends Phaser.Scene {
 
         // #region 소켓 수신
         // 모든 인스턴스 정보 받기
-        this.socket.on("currentInstances", (instances) => {
+        this.socket.on("currentGame", (instances, currentMap) => {
             Object.keys(instances).forEach((id) => {
                 const INSTANCE_INFO = instances[id];
 
@@ -104,6 +104,7 @@ class IngameScene extends Phaser.Scene {
                         break;
                 }
             });
+            this.createMap(currentMap);
         });
 
         // 플레이어 접속 끊김
@@ -166,6 +167,13 @@ class IngameScene extends Phaser.Scene {
             }
         });
 
+        // 게임 끝
+        this.socket.on("gameEnd", (currentMap) => {
+            this.map.destroy();
+            this.createMap(currentMap);
+            this.cameras.main.fadeIn(1000);
+        });
+
         // 모든 인스턴스 업데이트
         this.socket.on("instanceUpdates", (instances) => {
             Object.keys(instances).forEach((id) => {
@@ -220,15 +228,6 @@ class IngameScene extends Phaser.Scene {
             }
         });
         // #endregion
-
-        // 맵 불러오기
-        this.map = this.make.tilemap({ key: "map1" });
-        this.tileset = this.map.addTilesetImage("tileset1");
-        this.worldLayer = this.map.createStaticLayer("world", this.tileset, 0, 0);
-        this.worldLayer.setDepth(-100);
-
-        // 카메라 설정
-        this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 
         // 배경음악 재생
         bgmScheme.stop();
@@ -413,6 +412,7 @@ class IngameScene extends Phaser.Scene {
             this.enemyArrows.add(ENEMY_ARROW);
 
             ENEMY_ARROW.instanceId = playerInfo.instanceId;
+            ENEMY_ARROW.setTint(0xff0000);
         }
     }
 
@@ -424,5 +424,18 @@ class IngameScene extends Phaser.Scene {
         BULLET.dx = bulletInfo.x;
         BULLET.dy = bulletInfo.y;
         BULLET.flipX = bulletInfo.flipX;
+    }
+
+    createMap(currentMap) {
+        // 맵 불러오기
+        this.map = this.make.tilemap({ key: currentMap });
+        this.moon = this.map.addTilesetImage("moon");
+        this.wallLayer = this.map.createStaticLayer("wall", this.moon, 0, 0);
+        this.platformLayer = this.map.createStaticLayer("platform", this.moon, 0, 0);
+        this.wallLayer.setDepth(-100);
+        this.platformLayer.setDepth(-100);
+
+        // 카메라 설정
+        this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
     }
 }

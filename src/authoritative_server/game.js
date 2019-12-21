@@ -38,9 +38,10 @@ function preload() {
     this.load.image("player7", "assets/sprites/spr_player7.png");
     this.load.image("player8", "assets/sprites/spr_player8.png");
     this.load.image("bullet1", "assets/sprites/spr_bullet1.png");
-    this.load.image("tileset1", "assets/tilesets/tile_moon.png");
+    this.load.image("moon", "assets/tilesets/tile_moon.png");
 
-    this.load.tilemapTiledJSON("map1", "assets/tilemaps/map_moon1.json");
+    this.load.tilemapTiledJSON("moon1", "assets/tilemaps/map_moon1.json");
+    this.load.tilemapTiledJSON("moon2", "assets/tilemaps/map_moon2.json");
 }
 
 function create() {
@@ -48,7 +49,7 @@ function create() {
     this.bullets = this.physics.add.group();
 
     // 게임 제한시간 타이머
-    this.timer = "05:00";
+    this.timer = "00:15";
     this.timerAlarm = this.time.addEvent({
         delay: 1000,
         callback: () => {
@@ -61,9 +62,18 @@ function create() {
                 min--;
                 sec = 59;
             } else {
-                // TODO 타임오버 이벤트 구현
-                min = 5;
-                sec = 0;
+                // 게임 끝
+                min = 0;
+                sec = 15;
+
+                if (this.mapIndex < this.maps.length - 1) {
+                    this.mapIndex++;
+                } else {
+                    shuffle(this.maps);
+                    this.mapIndex = 0;
+                }
+                createMap(this);
+                io.emit("gameEnd", this.currentMap);
             }
 
             if (sec < 10) {
@@ -105,7 +115,7 @@ function create() {
                 flipX: false
             };
             createPlayer(this, INSTANCES[socket.id]);
-            socket.emit("currentInstances", INSTANCES);
+            socket.emit("currentGame", INSTANCES, this.currentMap);
             socket.broadcast.emit("addPlayer", INSTANCES[socket.id]);
         });
 
@@ -212,44 +222,11 @@ function create() {
         });
     });
 
-    // 맵 불러오기
-    this.map = this.make.tilemap({ key: "map1" });
-    this.tileset = this.map.addTilesetImage("tileset1");
-    this.worldLayer = this.map.createStaticLayer("world", this.tileset);
-    this.worldLayer.setCollisionByProperty({ solid: true });
-    this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
-
-    // 충돌 설정
-    this.physics.add.collider(
-        this.players,
-        this.worldLayer,
-        null,
-        (obj1, obj2) => {
-            if (obj1.y < obj2.y * 32 && !obj1.isDown) {
-                return true;
-            } else {
-                return false;
-            }
-        },
-        this
-    );
-    this.physics.add.overlap(this.players, this.bullets, (player, bullet) => {
-        if (player.instanceId != bullet.attackAt) {
-            player.body.setVelocityX(bullet.knockbackPower * !bullet.flipX ? 500 : -500);
-            player.body.setVelocityY(-200);
-            player.deadAt = bullet.attackAt;
-            destroyBullet(bullet);
-
-            if (player.hp > bullet.damage) {
-                player.hp -= bullet.damage;
-            } else {
-                playerDead(this, player);
-            }
-        }
-    });
-    this.physics.add.collider(this.bullets, this.worldLayer, (bullet) => {
-        destroyBullet(bullet);
-    });
+    // 맵 초기화
+    this.maps = ["moon1", "moon2"];
+    this.mapIndex = 0;
+    shuffle(this.maps);
+    createMap(this);
 }
 
 function update() {
@@ -364,6 +341,61 @@ function playerDead(scene, player) {
     player.body.reset(100 + Math.floor(Math.random() * scene.map.widthInPixels - 100), 100);
     player.hp = player.hpMax;
     io.emit("playerDead", INSTANCES[player.instanceId]);
+}
+
+function createMap(scene) {
+    scene.currentMap = scene.maps[scene.mapIndex];
+    scene.physics.world.colliders.destroy();
+
+    scene.map = scene.make.tilemap({ key: scene.currentMap });
+    scene.tileset = scene.map.addTilesetImage("moon");
+    scene.wallLayer = scene.map.createStaticLayer("wall", scene.tileset);
+    scene.platformLayer = scene.map.createStaticLayer("platform", scene.tileset);
+    scene.wallLayer.setCollisionByProperty({ solid: true });
+    scene.platformLayer.setCollisionByProperty({ solid: true });
+    scene.physics.world.setBounds(0, 0, scene.map.widthInPixels, scene.map.heightInPixels);
+
+    // 충돌 설정
+    scene.physics.add.collider(scene.players, scene.wallLayer);
+    scene.physics.add.collider(
+        scene.players,
+        scene.platformLayer,
+        null,
+        (player, platform) => {
+            if (player.y < platform.y * 32 && !player.isDown) {
+                return true;
+            }
+        },
+        scene
+    );
+    scene.physics.add.overlap(scene.players, scene.bullets, (player, bullet) => {
+        if (player.instanceId != bullet.attackAt) {
+            player.body.setVelocityX(bullet.knockbackPower * !bullet.flipX ? 500 : -500);
+            player.body.setVelocityY(-200);
+            player.deadAt = bullet.attackAt;
+            destroyBullet(bullet);
+
+            if (player.hp > bullet.damage) {
+                player.hp -= bullet.damage;
+            } else {
+                playerDead(scene, player);
+            }
+        }
+    });
+    scene.physics.add.collider(scene.bullets, scene.wallLayer, (bullet) => {
+        destroyBullet(bullet);
+    });
+}
+
+function shuffle(a) {
+    var j, x, i;
+    for (i = a.length - 1; i > 0; i--) {
+        j = Math.floor(Math.random() * (i + 1));
+        x = a[i];
+        a[i] = a[j];
+        a[j] = x;
+    }
+    return a;
 }
 
 function uuidgen() {

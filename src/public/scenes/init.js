@@ -18,9 +18,10 @@ class InitScene extends Phaser.Scene {
         this.load.image("enemyArrow", "assets/sprites/spr_enemy_arrow.png");
         this.load.image("weapon1", "assets/sprites/spr_weapon1.png");
         this.load.image("bullet1", "assets/sprites/spr_bullet1.png");
-        this.load.image("tileset1", "assets/tilesets/tile_moon.png");
+        this.load.image("moon", "assets/tilesets/tile_moon.png");
 
-        this.load.tilemapTiledJSON("map1", "assets/tilemaps/map_moon1.json");
+        this.load.tilemapTiledJSON("moon1", "assets/tilemaps/map_moon1.json");
+        this.load.tilemapTiledJSON("moon2", "assets/tilemaps/map_moon2.json");
 
         this.load.html("nameform", "assets/forms/form_name.html");
 
