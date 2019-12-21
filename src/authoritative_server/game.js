@@ -62,7 +62,7 @@ function create() {
                 min--;
                 sec = 59;
             } else {
-                // 게임 끝
+                // 타임오버
                 min = 0;
                 sec = 15;
 
@@ -73,7 +73,7 @@ function create() {
                     this.mapIndex = 0;
                 }
                 createMap(this);
-                io.emit("gameEnd", this.currentMap);
+                io.emit("timeOver", this.currentMap);
             }
 
             if (sec < 10) {
@@ -102,7 +102,7 @@ function create() {
             INSTANCES[socket.id] = {
                 instanceId: socket.id,
                 instanceType: "player",
-                x: 100 + Math.floor(Math.random() * this.map.widthInPixels - 100),
+                x: irandom_range(100, this.map.widthInPixels - 100),
                 y: 100,
                 name: name,
                 sprite: skin,
@@ -138,7 +138,7 @@ function create() {
         socket.on("playerMove", (inputData) => {
             this.players.getChildren().forEach((player) => {
                 if (socket.id == player.instanceId) {
-                    if (inputData.left != inputData.right) {
+                    if (inputData.left != inputData.right && !player.isKnockback) {
                         if (inputData.left) {
                             if (!player.isWall) {
                                 player.flipX = true;
@@ -166,8 +166,8 @@ function create() {
                         INSTANCES[ID] = {
                             instanceId: ID,
                             instanceType: "bullet",
-                            x: player.x,
-                            y: player.y,
+                            x: player.x + (player.flipX ? -40 : 40),
+                            y: player.y + 6 + irandom_range(-4, 4),
                             sprite: "bullet1",
                             attackAt: player.instanceId,
                             flipX: player.flipX
@@ -190,7 +190,7 @@ function create() {
         socket.on("playerJump", () => {
             this.players.getChildren().forEach((player) => {
                 if (socket.id == player.instanceId) {
-                    if (player.jumpCount > 0) {
+                    if (player.jumpCount > 0 && !player.isKnockback) {
                         player.body.setVelocityY(-player.jumpPower);
                         player.jumpCount--;
                         socket.emit("playerJump");
@@ -286,7 +286,7 @@ function createPlayer(scene, playerInfo) {
 
     PLAYER.body.setBounce(0, 0);
     PLAYER.body.setDragX(0.9);
-    PLAYER.body.setMaxSpeed(600);
+    PLAYER.body.maxVelocity.y = 600;
     PLAYER.body.useDamping = true;
 
     PLAYER.instanceId = playerInfo.instanceId;
@@ -302,6 +302,7 @@ function createPlayer(scene, playerInfo) {
     PLAYER.isWall = false;
     PLAYER.isDown = false;
     PLAYER.isAttack = true;
+    PLAYER.isKnockback = false;
     PLAYER.attackDelayTime = 150;
 }
 
@@ -309,15 +310,13 @@ function createBullet(scene, bulletInfo) {
     const BULLET = scene.physics.add.sprite(bulletInfo.x, bulletInfo.y, bulletInfo.sprite);
     scene.bullets.add(BULLET);
 
-    BULLET.body.setVelocityX(!bulletInfo.flipX ? 600 : -600);
-    BULLET.body.setMaxSpeed(600);
+    BULLET.body.setVelocityX(!bulletInfo.flipX ? 800 : -800);
     BULLET.body.allowGravity = false;
 
     BULLET.instanceId = bulletInfo.instanceId;
     BULLET.attackAt = bulletInfo.attackAt;
     BULLET.flipX = bulletInfo.flipX;
-    BULLET.damage = 10;
-    BULLET.knockbackPower = 1;
+    BULLET.damage = irandom_range(8, 12);
 }
 
 function destroyBullet(bullet) {
@@ -330,6 +329,13 @@ function playerDead(scene, player) {
     if (player.deadAt != null) {
         scene.players.getChildren().forEach((_player) => {
             if (player.deadAt == _player.instanceId) {
+                let hpHeal = 10;
+
+                if (_player.hp + hpHeal > player.hpMax) {
+                    _player.hp += hpHeal;
+                } else {
+                    _player.hp = player.hpMax;
+                }
                 _player.score++;
             }
         });
@@ -338,7 +344,7 @@ function playerDead(scene, player) {
         // 자살 페널티
         player.score--;
     }
-    player.body.reset(100 + Math.floor(Math.random() * scene.map.widthInPixels - 100), 100);
+    player.body.reset(irandom_range(100, scene.map.widthInPixels - 100), 100);
     player.hp = player.hpMax;
     io.emit("playerDead", INSTANCES[player.instanceId]);
 }
@@ -370,9 +376,16 @@ function createMap(scene) {
     );
     scene.physics.add.overlap(scene.players, scene.bullets, (player, bullet) => {
         if (player.instanceId != bullet.attackAt) {
-            player.body.setVelocityX(bullet.knockbackPower * !bullet.flipX ? 500 : -500);
+            player.body.setVelocityX(!bullet.flipX ? 800 : -800);
             player.body.setVelocityY(-200);
             player.deadAt = bullet.attackAt;
+            player.isKnockback = true;
+            player.stunAlarm = scene.time.addEvent({
+                delay: 500,
+                callback: () => {
+                    player.isKnockback = false;
+                }
+            });
             destroyBullet(bullet);
 
             if (player.hp > bullet.damage) {
@@ -385,6 +398,10 @@ function createMap(scene) {
     scene.physics.add.collider(scene.bullets, scene.wallLayer, (bullet) => {
         destroyBullet(bullet);
     });
+}
+
+function irandom_range(a, b) {
+    return a + Math.floor(Math.random() * (b + (a < 0 ? Math.abs(a) : 0) + 1));
 }
 
 function shuffle(a) {

@@ -167,8 +167,8 @@ class IngameScene extends Phaser.Scene {
             }
         });
 
-        // 게임 끝
-        this.socket.on("gameEnd", (currentMap) => {
+        // 타임오버
+        this.socket.on("timeOver", (currentMap) => {
             this.map.destroy();
             this.createMap(currentMap);
             this.cameras.main.fadeIn(1000);
@@ -427,15 +427,12 @@ class IngameScene extends Phaser.Scene {
     }
 
     createMap(currentMap) {
-        // 맵 불러오기
         this.map = this.make.tilemap({ key: currentMap });
         this.moon = this.map.addTilesetImage("moon");
         this.wallLayer = this.map.createStaticLayer("wall", this.moon, 0, 0);
         this.platformLayer = this.map.createStaticLayer("platform", this.moon, 0, 0);
         this.wallLayer.setDepth(-100);
         this.platformLayer.setDepth(-100);
-
-        // 카메라 설정
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
     }
 }

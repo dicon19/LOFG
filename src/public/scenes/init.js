@@ -45,10 +45,8 @@ class InitScene extends Phaser.Scene {
         this.load.audio("clickOn", "assets/sounds/sfx_click_on.ogg");
         this.load.audio("coin", "assets/sounds/sfx_coin.ogg");
         this.load.audio("heavyMachineGun", "assets/sounds/sfx_heavy_machine_gun.ogg");
-        this.load.audio("noAmmo", "assets/sounds/sfx_no_ammo.ogg");
         this.load.audio("playerDead", "assets/sounds/sfx_player_dead.ogg");
         this.load.audio("playerJump", "assets/sounds/sfx_player_jump.ogg");
-        this.load.audio("timeOver", "assets/sounds/sfx_time_over.ogg");
 
         // 로딩바
         const LOADING_BAR_X = 640;
@@ -136,10 +134,8 @@ class InitScene extends Phaser.Scene {
         sfxClickOn = this.sound.add("clickOn");
         sfxCoin = this.sound.add("coin");
         sfxHeavyMachineGun = this.sound.add("heavyMachineGun");
-        sfxNoAmmo = this.sound.add("noAmmo");
         sfxPlayerDead = this.sound.add("playerDead");
         sfxPlayerJump = this.sound.add("playerJump");
-        sfxTimeOver = this.sound.add("timeOver");
 
         // 띠로링
         sfxCoin.play();

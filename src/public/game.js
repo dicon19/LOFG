@@ -72,13 +72,4 @@ let skin = choose(SKINS);
 
 let ingameBgm = [];
 let ingameBgmIndex = 0;
-let bgmScheme,
-    sfxAttack1,
-    sfxClickHover,
-    sfxClickOn,
-    sfxCoin,
-    sfxHeavyMachineGun,
-    sfxNoAmmo,
-    sfxPlayerDead,
-    sfxPlayerJump,
-    sfxTimeOver;
+let bgmScheme, sfxAttack1, sfxClickHover, sfxClickOn, sfxCoin, sfxHeavyMachineGun, sfxPlayerDead, sfxPlayerJump;
