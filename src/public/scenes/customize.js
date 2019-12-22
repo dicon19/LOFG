@@ -4,9 +4,8 @@ class CustomizeScene extends Phaser.Scene {
     }
 
     create() {
-        this.pos = SKINS.indexOf(skin);
-
         this.cameras.main.fadeIn(1000);
+        this.pos = SKINS.indexOf(skin);
 
         this.helpText = this.add
             .text(640, 180, "캐릭터 선택", {
@@ -15,8 +14,7 @@ class CustomizeScene extends Phaser.Scene {
             })
             .setOrigin(0.5);
 
-        // <=
-        this.leftArrow = new Button(this, 320, 360, "arrow", () => {
+        this.leftArrow = new Button(this, 320, 360, "button_arrow", () => {
             if (this.pos > 0) {
                 this.pos--;
             } else {
@@ -27,8 +25,7 @@ class CustomizeScene extends Phaser.Scene {
         });
         this.leftArrow.flipX = true;
 
-        // =>
-        this.rightArrow = new Button(this, 960, 360, "arrow", () => {
+        this.rightArrow = new Button(this, 960, 360, "button_arrow", () => {
             if (this.pos < SKINS.length - 1) {
                 this.pos++;
             } else {
@@ -38,15 +35,13 @@ class CustomizeScene extends Phaser.Scene {
             this.player.anims.play(skin + "_move", true);
         });
 
-        // 메뉴 씬 이동 버튼
-        this.selectButton = new Button(this, 640, 520, "button", () => {
-            this.scene.start("menuScene");
-        });
-
-        // 캐릭터
         this.player = this.add
             .sprite(640, 360, skin)
             .setScale(3)
             .anims.play(skin + "_move", true);
+
+        this.selectButton = new Button(this, 640, 520, "button", () => {
+            this.scene.start("menuScene");
+        });
     }
 }

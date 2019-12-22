@@ -37,19 +37,28 @@ function preload() {
     this.load.image("player6", "assets/sprites/spr_player6.png");
     this.load.image("player7", "assets/sprites/spr_player7.png");
     this.load.image("player8", "assets/sprites/spr_player8.png");
-    this.load.image("bullet1", "assets/sprites/spr_bullet1.png");
-    this.load.image("moon", "assets/tilesets/tile_moon.png");
+    this.load.image("bullet", "assets/sprites/spr_bullet.png");
+    this.load.image("item_weapon_rapid", "assets/sprites/spr_item_weapon_rapid.png");
+    this.load.image("item_heal", "assets/sprites/spr_item_heal.png");
+    this.load.image("tileset", "assets/tilesets/tile_tileset.png");
 
-    this.load.tilemapTiledJSON("moon1", "assets/tilemaps/map_moon1.json");
-    this.load.tilemapTiledJSON("moon2", "assets/tilemaps/map_moon2.json");
+    this.load.tilemapTiledJSON("tilemap1", "assets/tilemaps/map_tilemap1.json");
+    this.load.tilemapTiledJSON("tilemap2", "assets/tilemaps/map_tilemap2.json");
+    this.load.tilemapTiledJSON("tilemap3", "assets/tilemaps/map_tilemap3.json");
+    this.load.tilemapTiledJSON("tilemap4", "assets/tilemaps/map_tilemap4.json");
+    this.load.tilemapTiledJSON("tilemap5", "assets/tilemaps/map_tilemap5.json");
+    this.load.tilemapTiledJSON("tilemap6", "assets/tilemaps/map_tilemap6.json");
+    this.load.tilemapTiledJSON("tilemap7", "assets/tilemaps/map_tilemap7.json");
+    this.load.tilemapTiledJSON("tilemap8", "assets/tilemaps/map_tilemap8.json");
 }
 
 function create() {
     this.players = this.physics.add.group();
     this.bullets = this.physics.add.group();
+    this.items = this.physics.add.group();
 
-    // 게임 제한시간 타이머
-    this.timer = "00:15";
+    // 제한시간 타이머
+    this.timer = "00:10";
     this.timerAlarm = this.time.addEvent({
         delay: 1000,
         callback: () => {
@@ -65,15 +74,7 @@ function create() {
                 // 타임오버
                 min = 0;
                 sec = 15;
-
-                if (this.mapIndex < this.maps.length - 1) {
-                    this.mapIndex++;
-                } else {
-                    shuffle(this.maps);
-                    this.mapIndex = 0;
-                }
-                createMap(this);
-                io.emit("timeOver", this.currentMap);
+                timeOver(this);
             }
 
             if (sec < 10) {
@@ -85,6 +86,14 @@ function create() {
             }
             this.timer = min + ":" + sec;
             io.emit("getTimer", this.timer);
+        },
+        loop: true
+    });
+
+    this.itemAlarm = this.time.addEvent({
+        delay: 8000,
+        callback: () => {
+            createItem(this);
         },
         loop: true
     });
@@ -103,13 +112,14 @@ function create() {
                 instanceId: socket.id,
                 instanceType: "player",
                 x: irandom_range(100, this.map.widthInPixels - 100),
-                y: 100,
+                y: 0,
                 name: name,
                 sprite: skin,
                 score: 0,
                 hpMax: 100,
                 hp: 100,
-                weapon: "weapon1",
+                weapon: "weapon",
+                isWeaponRapid: false,
                 isMove: false,
                 isWall: false,
                 flipX: false
@@ -168,17 +178,17 @@ function create() {
                             instanceType: "bullet",
                             x: player.x + (player.flipX ? -40 : 40),
                             y: player.y + 6 + irandom_range(-4, 4),
-                            sprite: "bullet1",
+                            sprite: "bullet",
                             attackAt: player.instanceId,
                             flipX: player.flipX
                         };
+                        player.isAttack = false;
                         player.attackAlarm = this.time.addEvent({
                             delay: player.attackDelayTime,
                             callback: () => {
                                 player.isAttack = true;
                             }
                         });
-                        player.isAttack = false;
                         createBullet(this, INSTANCES[ID]);
                         io.emit("addBullet", INSTANCES[ID]);
                     }
@@ -204,13 +214,13 @@ function create() {
             this.players.getChildren().forEach((player) => {
                 if (socket.id == player.instanceId) {
                     if (!player.isDown && player.body.blocked.down) {
+                        player.isDown = true;
                         player.downAlarm = this.time.addEvent({
                             delay: 300,
                             callback: () => {
                                 player.isDown = false;
                             }
                         });
-                        player.isDown = true;
                     }
                 }
             });
@@ -223,7 +233,7 @@ function create() {
     });
 
     // 맵 초기화
-    this.maps = ["moon1", "moon2"];
+    this.maps = ["tilemap1", "tilemap2", "tilemap3", "tilemap4", "tilemap5", "tilemap6", "tilemap7", "tilemap8"];
     this.mapIndex = 0;
     shuffle(this.maps);
     createMap(this);
@@ -237,6 +247,7 @@ function update() {
         PLAYER_INFO.y = player.y;
         PLAYER_INFO.score = player.score;
         PLAYER_INFO.hp = player.hp;
+        PLAYER_INFO.isWeaponRapid = player.isWeaponRapid;
         PLAYER_INFO.isMove = Math.abs(player.body.velocity.x) > 20;
         PLAYER_INFO.isWall = player.isWall;
         PLAYER_INFO.flipX = player.flipX;
@@ -260,7 +271,11 @@ function update() {
             player.jumpCount = player.jumpCountMax;
         }
 
-        if (!Phaser.Geom.Rectangle.Overlaps(this.physics.world.bounds, player.getBounds())) {
+        // 추락사
+        if (
+            (player.x < 0 || player.x > this.map.widthInPixels || player.y > this.map.heightInPixels) &&
+            !Phaser.Geom.Rectangle.Overlaps(this.physics.world.bounds, player.getBounds())
+        ) {
             playerDead(this, player);
         }
     });
@@ -276,8 +291,41 @@ function update() {
         }
     });
 
+    // 아이템 업데이트
+    this.items.getChildren().forEach((item) => {
+        const ITEM_INFO = INSTANCES[item.instanceId];
+        ITEM_INFO.x = item.x;
+        ITEM_INFO.y = item.y;
+
+        if (!Phaser.Geom.Rectangle.Overlaps(this.physics.world.bounds, item.getBounds())) {
+            destroyItem(item);
+        }
+    });
+
     // 모든 인스턴스 정보 보내기
     io.emit("instanceUpdates", INSTANCES);
+}
+
+function playerReset(player) {
+    player.hp = player.hpMax;
+    player.moveSpeed = player.moveSpeedMax;
+    player.jumpPower = player.jumpPowerMax;
+    player.jumpCount = player.jumpCountMax;
+    player.attackDelayTime = player.attackDelayTimeMax;
+    player.deadAt = null;
+    player.isWeaponRapid = false;
+    player.isWall = false;
+    player.isDown = false;
+    player.isAttack = true;
+    player.isKnockback = false;
+
+    if (player.attackAlarm != undefined) {
+        player.attackAlarm.remove();
+    }
+
+    if (player.weaponRapidAlarm != undefined) {
+        player.weaponRapidAlarm.remove();
+    }
 }
 
 function createPlayer(scene, playerInfo) {
@@ -291,19 +339,13 @@ function createPlayer(scene, playerInfo) {
 
     PLAYER.instanceId = playerInfo.instanceId;
     PLAYER.score = playerInfo.score;
-    PLAYER.hpMax = playerInfo.hpMax;
-    PLAYER.hp = playerInfo.hp;
     PLAYER.weapon = playerInfo.weapon;
-    PLAYER.deadAt = null;
-    PLAYER.moveSpeed = 300;
-    PLAYER.jumpPower = 400;
+    PLAYER.hpMax = playerInfo.hpMax;
+    PLAYER.moveSpeedMax = 300;
+    PLAYER.jumpPowerMax = 400;
     PLAYER.jumpCountMax = 2;
-    PLAYER.jumpCount = PLAYER.jumpCountMax;
-    PLAYER.isWall = false;
-    PLAYER.isDown = false;
-    PLAYER.isAttack = true;
-    PLAYER.isKnockback = false;
-    PLAYER.attackDelayTime = 150;
+    PLAYER.attackDelayTimeMax = 150;
+    playerReset(PLAYER);
 }
 
 function createBullet(scene, bulletInfo) {
@@ -319,34 +361,63 @@ function createBullet(scene, bulletInfo) {
     BULLET.damage = irandom_range(8, 12);
 }
 
-function destroyBullet(bullet) {
-    bullet.destroy();
-    delete INSTANCES[bullet.instanceId];
-    io.emit("destroyBullet", bullet.instanceId);
-}
-
 function playerDead(scene, player) {
     if (player.deadAt != null) {
         scene.players.getChildren().forEach((_player) => {
             if (player.deadAt == _player.instanceId) {
                 let hpHeal = 10;
 
-                if (_player.hp + hpHeal > player.hpMax) {
-                    _player.hp += hpHeal;
+                if (_player.hp + hpHeal > _player.hpMax) {
+                    _player.hp = _player.hpMax;
                 } else {
-                    _player.hp = player.hpMax;
+                    _player.hp += hpHeal;
                 }
                 _player.score++;
             }
         });
-        player.deadAt = null;
     } else if (player.score > 0) {
         // 자살 페널티
         player.score--;
     }
     player.body.reset(irandom_range(100, scene.map.widthInPixels - 100), 100);
-    player.hp = player.hpMax;
+    playerReset(player);
     io.emit("playerDead", INSTANCES[player.instanceId]);
+}
+
+function destroyBullet(bullet) {
+    bullet.destroy();
+    delete INSTANCES[bullet.instanceId];
+    io.emit("destroyBullet", bullet.instanceId);
+}
+
+function createItem(scene) {
+    const ID = uuidgen();
+    INSTANCES[ID] = {
+        instanceId: ID,
+        instanceType: "item",
+        x: irandom_range(100, scene.map.widthInPixels - 100),
+        y: 0,
+        sprite: choose(["item_weapon_rapid", "item_heal"])
+    };
+    const ITEM = scene.physics.add.sprite(INSTANCES[ID].x, INSTANCES[ID].y, INSTANCES[ID].sprite);
+    scene.items.add(ITEM);
+
+    ITEM.body.maxVelocity.y = 600;
+    ITEM.instanceId = INSTANCES[ID].instanceId;
+    ITEM.sprite = INSTANCES[ID].sprite;
+    ITEM.destroyAlarm = scene.time.addEvent({
+        delay: 40000,
+        callback: () => {
+            destroyItem(ITEM);
+        }
+    });
+    io.emit("addItem", INSTANCES[ID]);
+}
+
+function destroyItem(item) {
+    item.destroy();
+    delete INSTANCES[item.instanceId];
+    io.emit("destroyItem", item.instanceId);
 }
 
 function createMap(scene) {
@@ -354,7 +425,7 @@ function createMap(scene) {
     scene.physics.world.colliders.destroy();
 
     scene.map = scene.make.tilemap({ key: scene.currentMap });
-    scene.tileset = scene.map.addTilesetImage("moon");
+    scene.tileset = scene.map.addTilesetImage("tileset");
     scene.wallLayer = scene.map.createStaticLayer("wall", scene.tileset);
     scene.platformLayer = scene.map.createStaticLayer("platform", scene.tileset);
     scene.wallLayer.setCollisionByProperty({ solid: true });
@@ -380,8 +451,12 @@ function createMap(scene) {
             player.body.setVelocityY(-200);
             player.deadAt = bullet.attackAt;
             player.isKnockback = true;
-            player.stunAlarm = scene.time.addEvent({
-                delay: 500,
+
+            if (player.knockbackAlarm != undefined) {
+                player.knockbackAlarm.remove();
+            }
+            player.knockbackAlarm = scene.time.addEvent({
+                delay: 400,
                 callback: () => {
                     player.isKnockback = false;
                 }
@@ -398,6 +473,58 @@ function createMap(scene) {
     scene.physics.add.collider(scene.bullets, scene.wallLayer, (bullet) => {
         destroyBullet(bullet);
     });
+    scene.physics.add.collider(scene.items, scene.wallLayer);
+    scene.physics.add.collider(scene.items, scene.platformLayer);
+    scene.physics.add.overlap(scene.players, scene.items, (player, item) => {
+        switch (item.sprite) {
+            case "item_weapon_rapid":
+                player.attackDelayTime = player.attackDelayTimeMax / 3;
+                player.isWeaponRapid = true;
+
+                if (player.weaponRapidAlarm != undefined) {
+                    player.weaponRapidAlarm.remove();
+                }
+                player.weaponRapidAlarm = scene.time.addEvent({
+                    delay: 8000,
+                    callback: () => {
+                        player.attackDelayTime = player.attackDelayTimeMax;
+                        player.isWeaponRapid = false;
+                    }
+                });
+                break;
+            case "item_heal":
+                player.hp = player.hpMax;
+                break;
+        }
+        destroyItem(item);
+        io.emit("getItem", player.instanceId, item.sprite);
+    });
+}
+
+function timeOver(scene) {
+    if (scene.mapIndex < scene.maps.length - 1) {
+        scene.mapIndex++;
+    } else {
+        shuffle(scene.maps);
+        scene.mapIndex = 0;
+    }
+    createMap(scene);
+    io.emit("timeOver", scene.currentMap);
+
+    scene.players.getChildren().forEach((player) => {
+        player.body.reset(irandom_range(100, scene.map.widthInPixels - 100), 100);
+        playerReset(player);
+    });
+    scene.bullets.getChildren().forEach((bullet) => {
+        destroyBullet(bullet);
+    });
+    scene.items.getChildren().forEach((item) => {
+        destroyItem(item);
+    });
+}
+
+function choose(a) {
+    return a[Math.floor(Math.random() * a.length)];
 }
 
 function irandom_range(a, b) {

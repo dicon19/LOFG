@@ -21,13 +21,13 @@ class MenuScene extends Phaser.Scene {
             .setOrigin(0.5);
 
         // 이름 입력 창
-        this.element = this.add.dom(640, 460).createFromCache("nameform");
-        this.element.getChildByName("nameField").value = name;
-        this.element.addListener("click");
-        this.element.on("click", (event) => {
+        this.nameField = this.add.dom(640, 460).createFromCache("name_field");
+        this.nameField.getChildByName("inputField").value = name;
+        this.nameField.addListener("click");
+        this.nameField.on("click", (event) => {
             if (event.target.name == "playButton") {
-                if (this.element.getChildByName("nameField").value != "") {
-                    name = this.element.getChildByName("nameField").value;
+                if (this.nameField.getChildByName("inputField").value != "") {
+                    name = this.nameField.getChildByName("inputField").value;
                 } else {
                     // 기본 이름 설정
                     name = "플레이어";
@@ -38,15 +38,15 @@ class MenuScene extends Phaser.Scene {
         });
 
         // 커스텀마이즈 씬 이동 버튼
-        this.customize = new Button(this, 100, 600, "customize", () => {
-            name = this.element.getChildByName("nameField").value;
+        this.customize = new Button(this, 100, 600, "button_customize", () => {
+            name = this.nameField.getChildByName("inputField").value;
             this.socket.disconnect();
             this.scene.start("customizeScene");
         });
 
         // 크래딧 씬 이동 버튼
-        this.credit = new Button(this, 1160, 600, "credit", () => {
-            name = this.element.getChildByName("nameField").value;
+        this.credit = new Button(this, 1160, 600, "button_credit", () => {
+            name = this.nameField.getChildByName("inputField").value;
             this.socket.disconnect();
             this.scene.start("creditScene");
         });

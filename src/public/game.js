@@ -19,7 +19,6 @@ class Button extends Phaser.GameObjects.Sprite {
         scene.add.existing(this);
 
         this.setInteractive();
-
         this.on("pointerover", () => {
             this.setTint(0xcccccc);
             scene.tweens.add({
@@ -31,7 +30,6 @@ class Button extends Phaser.GameObjects.Sprite {
             });
             sfxClickHover.play();
         });
-
         this.on("pointerout", () => {
             this.setTint(0xffffff);
             scene.tweens.add({
@@ -42,12 +40,15 @@ class Button extends Phaser.GameObjects.Sprite {
                 duration: 300
             });
         });
-
         this.on("pointerup", () => {
             callback();
             sfxClickOn.play();
         });
     }
+}
+
+function choose(a) {
+    return a[Math.floor(Math.random() * a.length)];
 }
 
 function shuffle(a) {
@@ -61,10 +62,6 @@ function shuffle(a) {
     return a;
 }
 
-function choose(a) {
-    return a[Math.floor(Math.random() * a.length)];
-}
-
 const GAME = new Phaser.Game(CONFIG);
 const SKINS = ["player1", "player2", "player3", "player4", "player5", "player6", "player7", "player8"];
 let name = "";
@@ -72,4 +69,4 @@ let skin = choose(SKINS);
 
 let ingameBgm = [];
 let ingameBgmIndex = 0;
-let bgmScheme, sfxAttack1, sfxClickHover, sfxClickOn, sfxCoin, sfxHeavyMachineGun, sfxPlayerDead, sfxPlayerJump;
+let bgmScheme, sfxAttack, sfxClickHover, sfxClickOn, sfxCoin, sfxHeavyMachineGun, sfxPlayerDead, sfxPlayerJump;
