@@ -58,7 +58,7 @@ function create() {
     this.items = this.physics.add.group();
 
     // 제한시간 타이머
-    this.timer = "00:10";
+    this.timer = "02:00";
     this.timerAlarm = this.time.addEvent({
         delay: 1000,
         callback: () => {
@@ -72,8 +72,8 @@ function create() {
                 sec = 59;
             } else {
                 // 타임오버
-                min = 0;
-                sec = 15;
+                min = 2;
+                sec = 0;
                 timeOver(this);
             }
 
@@ -91,7 +91,7 @@ function create() {
     });
 
     this.itemAlarm = this.time.addEvent({
-        delay: 8000,
+        delay: 5000,
         callback: () => {
             createItem(this);
         },
@@ -344,7 +344,7 @@ function createPlayer(scene, playerInfo) {
     PLAYER.moveSpeedMax = 300;
     PLAYER.jumpPowerMax = 400;
     PLAYER.jumpCountMax = 2;
-    PLAYER.attackDelayTimeMax = 150;
+    PLAYER.attackDelayTimeMax = 200;
     playerReset(PLAYER);
 }
 
@@ -406,7 +406,7 @@ function createItem(scene) {
     ITEM.instanceId = INSTANCES[ID].instanceId;
     ITEM.sprite = INSTANCES[ID].sprite;
     ITEM.destroyAlarm = scene.time.addEvent({
-        delay: 40000,
+        delay: 20000,
         callback: () => {
             destroyItem(ITEM);
         }
@@ -447,7 +447,7 @@ function createMap(scene) {
     );
     scene.physics.add.overlap(scene.players, scene.bullets, (player, bullet) => {
         if (player.instanceId != bullet.attackAt) {
-            player.body.setVelocityX(!bullet.flipX ? 800 : -800);
+            player.body.setVelocityX(!bullet.flipX ? 600 : -600);
             player.body.setVelocityY(-200);
             player.deadAt = bullet.attackAt;
             player.isKnockback = true;
@@ -478,7 +478,7 @@ function createMap(scene) {
     scene.physics.add.overlap(scene.players, scene.items, (player, item) => {
         switch (item.sprite) {
             case "item_weapon_rapid":
-                player.attackDelayTime = player.attackDelayTimeMax / 3;
+                player.attackDelayTime = player.attackDelayTimeMax / 4;
                 player.isWeaponRapid = true;
 
                 if (player.weaponRapidAlarm != undefined) {
@@ -508,9 +508,6 @@ function timeOver(scene) {
         shuffle(scene.maps);
         scene.mapIndex = 0;
     }
-    createMap(scene);
-    io.emit("timeOver", scene.currentMap);
-
     scene.players.getChildren().forEach((player) => {
         player.body.reset(irandom_range(100, scene.map.widthInPixels - 100), 100);
         playerReset(player);
@@ -521,6 +518,8 @@ function timeOver(scene) {
     scene.items.getChildren().forEach((item) => {
         destroyItem(item);
     });
+    createMap(scene);
+    io.emit("timeOver", scene.currentMap);
 }
 
 function choose(a) {

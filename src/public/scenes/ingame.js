@@ -159,13 +159,6 @@ class IngameScene extends Phaser.Scene {
 
         // 플레이어 죽음
         this.socket.on("playerDead", (playerInfo) => {
-            this.players.getChildren().forEach((player) => {
-                if (playerInfo.instanceId == player.instanceId) {
-                    player.x = playerInfo.x;
-                    player.y = playerInfo.y;
-                }
-            });
-
             if (playerInfo.instanceId == this.myPlayer.instanceId) {
                 sfxPlayerDead.play();
             }
