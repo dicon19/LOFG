@@ -10,7 +10,14 @@ class CustomizeScene extends Phaser.Scene {
         this.helpText = this.add
             .text(640, 180, "캐릭터 선택", {
                 fontFamily: "NanumGothic",
-                fontSize: "64px"
+                fontSize: "64px",
+                shadow: {
+                    offsetX: 5,
+                    offsetY: 5,
+                    color: "#cccccc",
+                    blur: 10,
+                    fill: true
+                }
             })
             .setOrigin(0.5);
 

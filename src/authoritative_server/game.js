@@ -49,7 +49,6 @@ function preload() {
     this.load.tilemapTiledJSON("tilemap5", "assets/tilemaps/map_tilemap5.json");
     this.load.tilemapTiledJSON("tilemap6", "assets/tilemaps/map_tilemap6.json");
     this.load.tilemapTiledJSON("tilemap7", "assets/tilemaps/map_tilemap7.json");
-    this.load.tilemapTiledJSON("tilemap8", "assets/tilemaps/map_tilemap8.json");
 }
 
 function create() {
@@ -233,7 +232,7 @@ function create() {
     });
 
     // 맵 초기화
-    this.maps = ["tilemap1", "tilemap2", "tilemap3", "tilemap4", "tilemap5", "tilemap6", "tilemap7", "tilemap8"];
+    this.maps = ["tilemap1", "tilemap2", "tilemap3", "tilemap4", "tilemap5", "tilemap6", "tilemap7"];
     this.mapIndex = 0;
     shuffle(this.maps);
     createMap(this);
@@ -358,14 +357,14 @@ function createBullet(scene, bulletInfo) {
     BULLET.instanceId = bulletInfo.instanceId;
     BULLET.attackAt = bulletInfo.attackAt;
     BULLET.flipX = bulletInfo.flipX;
-    BULLET.damage = irandom_range(8, 12);
+    BULLET.damage = 5;
 }
 
 function playerDead(scene, player) {
     if (player.deadAt != null) {
         scene.players.getChildren().forEach((_player) => {
             if (player.deadAt == _player.instanceId) {
-                let hpHeal = 10;
+                let hpHeal = 20;
 
                 if (_player.hp + hpHeal > _player.hpMax) {
                     _player.hp = _player.hpMax;
@@ -447,7 +446,7 @@ function createMap(scene) {
     );
     scene.physics.add.overlap(scene.players, scene.bullets, (player, bullet) => {
         if (player.instanceId != bullet.attackAt) {
-            player.body.setVelocityX(!bullet.flipX ? 600 : -600);
+            player.body.setVelocityX(!bullet.flipX ? 400 : -400);
             player.body.setVelocityY(-200);
             player.deadAt = bullet.attackAt;
             player.isKnockback = true;
@@ -456,7 +455,7 @@ function createMap(scene) {
                 player.knockbackAlarm.remove();
             }
             player.knockbackAlarm = scene.time.addEvent({
-                delay: 400,
+                delay: 200,
                 callback: () => {
                     player.isKnockback = false;
                 }
@@ -478,7 +477,7 @@ function createMap(scene) {
     scene.physics.add.overlap(scene.players, scene.items, (player, item) => {
         switch (item.sprite) {
             case "item_weapon_rapid":
-                player.attackDelayTime = player.attackDelayTimeMax / 4;
+                player.attackDelayTime = player.attackDelayTimeMax / 3;
                 player.isWeaponRapid = true;
 
                 if (player.weaponRapidAlarm != undefined) {

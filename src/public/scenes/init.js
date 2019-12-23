@@ -9,7 +9,7 @@ class InitScene extends Phaser.Scene {
         this.load.image("background2", "assets/backgrounds/bg_background2.png");
         this.load.image("logo", "assets/sprites/spr_logo.png");
         this.load.image("button_customize", "assets/sprites/spr_button_customize.png");
-        this.load.image("button_credit", "assets/sprites/spr_button_credit.png");
+        this.load.image("button_website", "assets/sprites/spr_button_website.png");
         this.load.image("button_arrow", "assets/sprites/spr_button_arrow.png");
         this.load.image("button", "assets/sprites/spr_button.png");
         this.load.image("timer", "assets/sprites/spr_timer.png");
@@ -31,7 +31,6 @@ class InitScene extends Phaser.Scene {
         this.load.tilemapTiledJSON("tilemap5", "assets/tilemaps/map_tilemap5.json");
         this.load.tilemapTiledJSON("tilemap6", "assets/tilemaps/map_tilemap6.json");
         this.load.tilemapTiledJSON("tilemap7", "assets/tilemaps/map_tilemap7.json");
-        this.load.tilemapTiledJSON("tilemap8", "assets/tilemaps/map_tilemap8.json");
 
         this.load.html("name_field", "assets/forms/form_name_field.html");
 

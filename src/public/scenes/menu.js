@@ -44,12 +44,20 @@ class MenuScene extends Phaser.Scene {
             this.scene.start("customizeScene");
         });
 
-        // 크래딧 씬 이동 버튼
-        this.credit = new Button(this, 1160, 600, "button_credit", () => {
-            name = this.nameField.getChildByName("inputField").value;
-            this.socket.disconnect();
-            this.scene.start("creditScene");
+        // 웹사이트 이동 버튼
+        this.website = new Button(this, 1160, 600, "button_website", () => {
+            window.open("https://www.facebook.com/groups/1467345873420940/");
         });
+
+        // 크래딧
+        this.crdit = this.add
+            .text(640, 640, "강준하,김형규,박경서,안정훈,정지은@2019선린디콘", {
+                fontFamily: "NanumGothic",
+                fontSize: "14px",
+                stroke: "#000000",
+                strokeThickness: 4
+            })
+            .setOrigin(0.5);
 
         // 접속중인 플레이어 수 받기
         this.socket.on("getPlayers", (players) => {

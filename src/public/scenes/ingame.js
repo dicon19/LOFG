@@ -8,7 +8,11 @@ class IngameScene extends Phaser.Scene {
         this.socket.emit("ingame", name, skin);
 
         this.cameras.main.fadeIn(1000);
-        this.cameras.main.setBackgroundColor("#a3cca3");
+        this.background = this.add
+            .sprite(0, 0, "background1")
+            .setDisplaySize(2560, 1440)
+            .setOrigin(0, 0)
+            .setDepth(-10000);
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
@@ -22,7 +26,7 @@ class IngameScene extends Phaser.Scene {
 
         // 핑 보내기
         this.latency = 0;
-        setInterval(() => {
+        this.latencyInterval = setInterval(() => {
             this.latencyStart = Date.now();
             this.socket.emit("latency");
         }, 500);
@@ -138,7 +142,7 @@ class IngameScene extends Phaser.Scene {
         this.socket.on("addBullet", (bulletInfo) => {
             this.createBullet(bulletInfo);
 
-            if (bulletInfo.attackAt == this.myPlayer.instanceId) {
+            if (bulletInfo.attackAt == this.socket.id) {
                 sfxAttack.play();
             }
         });
@@ -159,7 +163,7 @@ class IngameScene extends Phaser.Scene {
 
         // 플레이어 죽음
         this.socket.on("playerDead", (playerInfo) => {
-            if (playerInfo.instanceId == this.myPlayer.instanceId) {
+            if (playerInfo.instanceId == this.socket.id) {
                 sfxPlayerDead.play();
             }
         });
@@ -185,7 +189,7 @@ class IngameScene extends Phaser.Scene {
 
         // 아이템 획득
         this.socket.on("getItem", (playerId, item) => {
-            if (this.myPlayer.instanceId == playerId) {
+            if (this.socket.id == playerId) {
                 switch (item) {
                     case "item_weapon_rapid":
                         sfxHeavyMachineGun.play();
@@ -305,6 +309,7 @@ class IngameScene extends Phaser.Scene {
                 this.resume.setDepth(2000);
 
                 this.exit = new Button(this, 640, 580, "button_exit", () => {
+                    clearInterval(this.latencyInterval);
                     this.socket.disconnect();
                     this.scene.start("menuScene");
                 });
@@ -381,13 +386,7 @@ class IngameScene extends Phaser.Scene {
             player.hpBox.fillRect(player.x - 24, player.y - 28, 48, 12);
 
             player.hpBar.clear();
-            player.hpBar.fillStyle(
-                this.myPlayer != undefined
-                    ? player.instanceId == this.myPlayer.instanceId
-                        ? 0x00ff00
-                        : 0xff0000
-                    : 0xff0000
-            );
+            player.hpBar.fillStyle(player.instanceId == this.socket.id ? 0x00ff00 : 0xff0000);
             player.hpBar.fillRect(player.x - 24, player.y - 28, player.hpBar.dx, 12);
             this.tweens.add({
                 targets: player.hpBar,
@@ -512,13 +511,7 @@ class IngameScene extends Phaser.Scene {
     }
 
     createArrow(targetId, color) {
-        const ARROW = this.add
-            .sprite(
-                this.myPlayer != undefined ? this.myPlayer.x : 0,
-                this.myPlayer != undefined ? this.myPlayer.y : 0,
-                "arrow"
-            )
-            .setDepth(50);
+        const ARROW = this.add.sprite(0, 0, "arrow").setDepth(50);
         this.arrows.add(ARROW);
 
         ARROW.targetId = targetId;
@@ -531,8 +524,8 @@ class IngameScene extends Phaser.Scene {
         this.tileset = this.map.addTilesetImage("tileset");
         this.wallLayer = this.map.createStaticLayer("wall", this.tileset, 0, 0);
         this.platformLayer = this.map.createStaticLayer("platform", this.tileset, 0, 0);
-        this.wallLayer.setDepth(Number.MIN_VALUE);
-        this.platformLayer.setDepth(Number.MIN_VALUE);
+        this.wallLayer.setDepth(-1000);
+        this.platformLayer.setDepth(-1000);
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
     }
 }
