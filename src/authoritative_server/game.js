@@ -89,8 +89,9 @@ function create() {
         loop: true
     });
 
+    // 아이템 드롭 타이머
     this.itemAlarm = this.time.addEvent({
-        delay: 5000,
+        delay: 4000,
         callback: () => {
             createItem(this);
         },
@@ -124,7 +125,7 @@ function create() {
                 flipX: false
             };
             createPlayer(this, INSTANCES[socket.id]);
-            socket.emit("currentGame", INSTANCES, this.currentMap);
+            socket.emit("currentGame", INSTANCES, { map: this.currentMap, background: this.currentBackground });
             socket.broadcast.emit("addPlayer", INSTANCES[socket.id]);
         });
 
@@ -233,6 +234,7 @@ function create() {
 
     // 맵 초기화
     this.maps = ["tilemap1", "tilemap2", "tilemap3", "tilemap4", "tilemap5", "tilemap6", "tilemap7"];
+    this.backgrounds = ["background1", "background2"];
     this.mapIndex = 0;
     shuffle(this.maps);
     createMap(this);
@@ -378,7 +380,7 @@ function playerDead(scene, player) {
         // 자살 페널티
         player.score--;
     }
-    player.body.reset(irandom_range(100, scene.map.widthInPixels - 100), 100);
+    player.body.reset(irandom_range(100, scene.map.widthInPixels - 100), 0);
     playerReset(player);
     io.emit("playerDead", INSTANCES[player.instanceId]);
 }
@@ -421,6 +423,7 @@ function destroyItem(item) {
 
 function createMap(scene) {
     scene.currentMap = scene.maps[scene.mapIndex];
+    scene.currentBackground = choose(scene.backgrounds);
     scene.physics.world.colliders.destroy();
 
     scene.map = scene.make.tilemap({ key: scene.currentMap });
@@ -484,7 +487,7 @@ function createMap(scene) {
                     player.weaponRapidAlarm.remove();
                 }
                 player.weaponRapidAlarm = scene.time.addEvent({
-                    delay: 8000,
+                    delay: 6000,
                     callback: () => {
                         player.attackDelayTime = player.attackDelayTimeMax;
                         player.isWeaponRapid = false;
@@ -508,7 +511,7 @@ function timeOver(scene) {
         scene.mapIndex = 0;
     }
     scene.players.getChildren().forEach((player) => {
-        player.body.reset(irandom_range(100, scene.map.widthInPixels - 100), 100);
+        player.body.reset(irandom_range(100, scene.map.widthInPixels - 100), 0);
         playerReset(player);
     });
     scene.bullets.getChildren().forEach((bullet) => {
@@ -518,7 +521,7 @@ function timeOver(scene) {
         destroyItem(item);
     });
     createMap(scene);
-    io.emit("timeOver", scene.currentMap);
+    io.emit("timeOver", { map: scene.currentMap, background: scene.currentBackground });
 }
 
 function choose(a) {

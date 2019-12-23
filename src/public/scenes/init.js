@@ -138,6 +138,8 @@ class InitScene extends Phaser.Scene {
         shuffle(ingameBgm);
 
         bgmScheme = this.sound.add("scheme");
+        bgmScheme.setLoop(true);
+
         sfxAttack = this.sound.add("attack");
         sfxClickHover = this.sound.add("clickHover");
         sfxClickOn = this.sound.add("clickOn");

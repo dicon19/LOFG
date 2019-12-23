@@ -9,10 +9,9 @@ class IngameScene extends Phaser.Scene {
 
         this.cameras.main.fadeIn(1000);
         this.background = this.add
-            .sprite(0, 0, "background1")
-            .setDisplaySize(2560, 1440)
+            .sprite(0, 0, null)
             .setOrigin(0, 0)
-            .setDepth(-10000);
+            .setDepth(-100);
 
         this.cursors = this.input.keyboard.createCursorKeys();
         this.escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
@@ -96,7 +95,7 @@ class IngameScene extends Phaser.Scene {
 
         // #region 소켓 수신
         // 모든 인스턴스 정보 받기
-        this.socket.on("currentGame", (instances, currentMap) => {
+        this.socket.on("currentGame", (instances, mapInfo) => {
             Object.keys(instances).forEach((id) => {
                 const INSTANCE_INFO = instances[id];
 
@@ -112,7 +111,7 @@ class IngameScene extends Phaser.Scene {
                         break;
                 }
             });
-            this.createMap(currentMap);
+            this.createMap(mapInfo);
         });
 
         // 새로운 플레이어 접속
@@ -202,9 +201,9 @@ class IngameScene extends Phaser.Scene {
         });
 
         // 타임오버
-        this.socket.on("timeOver", (currentMap) => {
+        this.socket.on("timeOver", (mapInfo) => {
             this.map.destroy();
-            this.createMap(currentMap);
+            this.createMap(mapInfo);
 
             if (!this.isMenu) {
                 this.cameras.main.fadeIn(1000);
@@ -507,7 +506,7 @@ class IngameScene extends Phaser.Scene {
         ITEM.instanceId = itemInfo.instanceId;
         ITEM.dx = itemInfo.x;
         ITEM.dy = itemInfo.y;
-        this.createArrow(ITEM.instanceId, 0x0000ff);
+        this.createArrow(itemInfo.instanceId, 0x0000ff);
     }
 
     createArrow(targetId, color) {
@@ -519,13 +518,15 @@ class IngameScene extends Phaser.Scene {
         ARROW.setAlpha(0.3);
     }
 
-    createMap(currentMap) {
-        this.map = this.make.tilemap({ key: currentMap });
+    createMap(mapInfo) {
+        this.map = this.make.tilemap({ key: mapInfo.map });
+        this.background.setTexture(mapInfo.background);
+        this.background.setDisplaySize(this.map.widthInPixels, this.map.heightInPixels);
         this.tileset = this.map.addTilesetImage("tileset");
         this.wallLayer = this.map.createStaticLayer("wall", this.tileset, 0, 0);
         this.platformLayer = this.map.createStaticLayer("platform", this.tileset, 0, 0);
-        this.wallLayer.setDepth(-1000);
-        this.platformLayer.setDepth(-1000);
+        this.wallLayer.setDepth(-10);
+        this.platformLayer.setDepth(-10);
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
     }
 }
